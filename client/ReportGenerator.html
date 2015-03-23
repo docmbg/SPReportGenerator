@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
+    <title>ReportGenerator</title>
+    <script type="text/javascript">
+    if (!window.console) {
+        console = {
+            log: function() {}
+        };
+    }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/sharepointplus/3.0.10/sharepointplus.min.js"></script>
+    <script src="../js/report.js"></script>
+</head>
+
+<body>
+    <select name="recordTypes" id="recordTypes">
+        <option value"All Types">All Types</option>
+    </select>
+    <span><input type="button" value="Get Files" id="getFilesBtn"></span>
+    <div>
+        <p>
+            <label>
+                <input type="checkbox" id="checkAll" />Select all</label>
+        </p>
+    </div>
+    <div id="subsites"></div>
+    <hr>
+    <div>
+        <ol id="docs" type="1"></ol>
+    </div>
+    <div id="error" style="color:red;"></div>
+</body>
+
+</html>

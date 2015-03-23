@@ -1,0 +1,17 @@
+{
+    // Details: https://github.com/victorporof/Sublime-JSHint#using-your-own-jshintrc-options
+    // Example: https://github.com/jshint/jshint/blob/master/examples/.jshintrc
+    // Documentation: http://www.jshint.com/docs/
+    "browser": true,
+    "esnext": true,
+    "globals": {
+        "$SP": false,
+        "jQuery": false,
+        "console": false,
+        "$": false
+    },
+    "globalstrict": false,
+    "quotmark": true,
+    "undef": true,
+    "unused": true
+}
