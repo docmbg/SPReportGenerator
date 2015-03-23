@@ -165,3 +165,5 @@ function generateReport() {
         getDocuments(subs[i], recType, sName);
     }
 }
+
+//simo added something
