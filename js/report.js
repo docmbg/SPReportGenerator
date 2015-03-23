@@ -103,7 +103,10 @@ function getDocumentInfo() {
         for (var j = 0; j < data.length; j++) {
             var trim = data[j].getAttribute("TRIM");
             var fiscalYear = data[j].getAttribute("FY");
-            var createdBy = data[j].getAttribute("Created_x0020_By");
+            var createdBy = $SP().cleanResult(data[j].getAttribute("Author"));
+            var absURL = data[j].getAttribute("EncodedAbsUrl");
+            var modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor"));
+
 
             //get document content type guid
             var ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6);
@@ -119,7 +122,7 @@ function getDocumentInfo() {
 
                 //clean up the document file name and save it in a new variable to be used in the excel table
                 var docname = document.createTextNode(rawname +
-                    ", " + "RS Code:" + trim + ", " + fiscalYear + ", " + createdBy);
+                    ", " + "URL: " + absURL + ", RS Code: " + trim + ", " + fiscalYear + ", Created By: " + createdBy + ", Modified By: " + modifiedBy);
 
                 //create new list item element
                 var docNode = document.createElement("li");
@@ -141,19 +144,20 @@ function getDocuments(url, recType, staticName) {
         for (var i = 0; i < list.length; i++) {
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "TRIM,FileLeafRef,ContentTypeId,Created_x0020_By,FY",
+                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY,",
                     where: staticName + '="' + recType + '"'
                         //static way
                         //'Document_x0020_Type = "' + recType + '"'
                 }, getDocumentInfo());
             } else {
                 $SP().list(list[i].Name, url).get({
-                    fields: "TRIM,FileLeafRef,ContentTypeId,Created_x0020_By,FY",
+                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY,",
                 }, getDocumentInfo());
             }
         }
     });
 }
+
 
 function generateReport() {
     console.log("Getting document...");
