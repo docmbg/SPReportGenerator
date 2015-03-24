@@ -168,7 +168,7 @@ function getDocuments(url, recType, staticName) {
         for (var i = 0; i < list.length; i++) {
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY",
+                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY" + staticName,
                     where: staticName + '="' + recType + '"'
                         //static way
                         //'Document_x0020_Type = "' + recType + '"'
