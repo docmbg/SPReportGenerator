@@ -1,7 +1,21 @@
 /* jshint -W110 */
 
 var subsites = [];
+var fileCollection = [];
 
+var ep = new ExcelPlus();
+//add a sheet to the file to store the data
+ep.createFile("Sheet1");
+
+
+function createFile(arg, name) {
+    //simply give the write method the 2d array as content value
+    ep.write({
+        "content": arg
+    });
+    //finally save the file
+    return ep.saveAs(name + ".xlsx");
+}
 
 //variable to hold the static name of the Document Type column
 var sName;
@@ -11,6 +25,7 @@ function getCurrentSite() {
     dfd.resolve($().SPServices.SPGetCurrentSite());
     return dfd.promise();
 }
+
 
 // will use in RIST Page
 function getStaticName() {
@@ -48,8 +63,7 @@ function genSitesArray() {
     console.log("Generating array of sub-sites");
     subsites = $("#subsites input:checkbox:checked").map(function() {
         return $(this).val();
-    }).get(); // <----
-    console.log(subsites);
+    }).get();
     return $.Deferred().resolve(false);
 }
 
@@ -62,8 +76,13 @@ $(document).ready(function() {
         event.preventDefault();
         genSitesArray().done(function() {
             $('#docs').html("");
+            fileCollection = [];
             generateReport();
         });
+    });
+    $("#downloadReportBtn").click(function(event) {
+        event.preventDefault();
+        createFile(fileCollection, "GeneratedReport");
     });
 });
 
@@ -98,16 +117,17 @@ function getDocumentInfo() {
         if (error !== undefined) {
             console.log(error);
         }
-
+        console.log("Retrievient documents");
         //get info for fields returned
         for (var j = 0; j < data.length; j++) {
+            //an array to hold the metadata information for each file
+            var arr = [];
             var trim = data[j].getAttribute("TRIM");
             var fiscalYear = data[j].getAttribute("FY");
             var createdBy = $SP().cleanResult(data[j].getAttribute("Author"));
             var absURL = data[j].getAttribute("EncodedAbsUrl");
             var modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor"));
-
-
+            var documentType = $SP().cleanResult(data[j].getAttribute(sName));
             //get document content type guid
             var ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6);
 
@@ -124,6 +144,8 @@ function getDocumentInfo() {
                 var docname = document.createTextNode(rawname +
                     ", " + "URL: " + absURL + ", RS Code: " + trim + ", " + fiscalYear + ", Created By: " + createdBy + ", Modified By: " + modifiedBy);
 
+                //push metadata info into the current scope array
+                arr.push(rawname, documentType, trim, fiscalYear, createdBy, modifiedBy, absURL);
                 //create new list item element
                 var docNode = document.createElement("li");
 
@@ -133,6 +155,8 @@ function getDocumentInfo() {
                 //get the main div and append the 
                 document.getElementById("docs").appendChild(docNode);
             }
+            //push current file metadata array to the global file collection array
+            fileCollection.push(arr);
         }
     };
 }
@@ -144,23 +168,23 @@ function getDocuments(url, recType, staticName) {
         for (var i = 0; i < list.length; i++) {
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY,",
+                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY",
                     where: staticName + '="' + recType + '"'
                         //static way
                         //'Document_x0020_Type = "' + recType + '"'
                 }, getDocumentInfo());
             } else {
                 $SP().list(list[i].Name, url).get({
-                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY,",
+                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY," + staticName,
+                    // where: staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
                 }, getDocumentInfo());
             }
         }
     });
 }
 
-
 function generateReport() {
-    console.log("Getting document...");
+    console.log("Getting documents...");
     var subs = subsites;
     var recType = $('#recordTypes option:selected').text();
     //depricated
@@ -169,6 +193,3 @@ function generateReport() {
         getDocuments(subs[i], recType, sName);
     }
 }
-
-//simo added something 2
-//mater branch comment

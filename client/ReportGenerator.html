@@ -15,15 +15,17 @@
         };
     }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/sharepointplus/3.0.10/sharepointplus.min.js"></script>
-    <script src="../js/report.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/sharepointplus/3.0.10/sharepointplus.min.js"></script>
+    <script type="text/javascript" src="../libraries/xlsx.core.min.js"></script>
+    <script type="text/javascript" src="../libraries/excelplus-2.2.min.js"></script>
+    <script type="text/javascript" src="../js/report.js"></script>
 </head>
 
 <body>
     <select name="recordTypes" id="recordTypes">
-        <option value"All Types">All Types</option>
+        <option value "All Types">All Types</option>
     </select>
     <span><input type="button" value="Get Files" id="getFilesBtn"></span>
     <div>
@@ -33,6 +35,8 @@
         </p>
     </div>
     <div id="subsites"></div>
+    <br>
+    <input type="button" value="Give me da excel" id="downloadReportBtn">
     <hr>
     <div>
         <ol id="docs" type="1"></ol>
