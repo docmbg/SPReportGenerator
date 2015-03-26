@@ -4,6 +4,8 @@ var subsites = [],
     fileCollection = [],
     ep = new ExcelPlus(),
     sName;
+
+//create sheet to hold the information
 ep.createFile("Sheet1");
 
 function createFile(arr, fileName) {
@@ -66,6 +68,7 @@ function genSitesArray() {
 }
 
 $(document).ready(function() {
+
     $("#checkAll").change(function() {
         $("input:checkbox").prop('checked', $(this).prop("checked"));
     });
@@ -78,6 +81,7 @@ $(document).ready(function() {
             generateReport();
         });
     });
+
     $("#downloadReportBtn").click(function(event) {
         event.preventDefault();
         createFile(fileCollection, "GeneratedReport");
@@ -115,46 +119,47 @@ function getDocumentInfo() {
         if (error !== undefined) {
             console.log(error);
         }
-        console.log("Retrievient documents");
+        console.log("Retrtieving documents for list...");
         //get info for fields returned
         for (var j = 0; j < data.length; j++) {
             //an array to hold the metadata information for each file
-            var arr = [];
-            var trim = data[j].getAttribute("TRIM");
-            var fiscalYear = data[j].getAttribute("FY");
-            var createdBy = $SP().cleanResult(data[j].getAttribute("Author"));
-            var absURL = data[j].getAttribute("EncodedAbsUrl");
-            var modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor"));
-            var documentType = $SP().cleanResult(data[j].getAttribute(sName));
-            //get document content type guid
-            var ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6);
+            var metaArray = [],
+                rsc = data[j].getAttribute("TRIM"),
+                fiscalYear = data[j].getAttribute("FY"),
+                createdBy = $SP().cleanResult(data[j].getAttribute("Author")),
+                absURL = data[j].getAttribute("EncodedAbsUrl"),
+                modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor")),
+                documentType = $SP().cleanResult(data[j].getAttribute(sName)),
+                ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6);
 
-            //return fields thad only match the "Document" content type, which is 0x0101
+            //return fields thad only match the "Document" content type, which has id of 0x0101
             if (ctypeID == "0x0101") {
                 //log raw document file name and author in the console
-                console.log(data[j].getAttribute("FileLeafRef") +
-                    ", " + data[j].getAttribute("Created_x0020_By"));
-
-                //save the raw document file name
-                var rawname = $SP().cleanResult(data[j].getAttribute("FileLeafRef"));
-
-                //clean up the document file name and save it in a new variable to be used in the excel table
-                var docname = document.createTextNode(rawname +
-                    ", " + "URL: " + absURL + ", RS Code: " + trim + ", " + fiscalYear + ", Created By: " + createdBy + ", Modified By: " + modifiedBy);
-
-                //push metadata info into the current scope array
-                arr.push(rawname, documentType, trim, fiscalYear, createdBy, modifiedBy, absURL);
+                console.log(data[j].getAttribute("FileLeafRef"));
+               
                 //create new list item element
-                var docNode = document.createElement("li");
+                var docNode = document.createElement("li"),
+                    //save the raw document file name
+                    fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef")),
+                    //prepare the string to be used as item in the ordered list #docs
+                    listItem = document.createTextNode(
+                        fileName +
+                        ", URL: " + absURL +
+                        ", RS Code: " + rsc +
+                        ", Fiscal Year: " + fiscalYear +
+                        ", Created By: " + createdBy +
+                        ", Modified By: " + modifiedBy
+                    );
+                //push metadata info into the current scope array
+                metaArray.push(fileName, documentType, rsc, fiscalYear, createdBy, modifiedBy, absURL);
 
-                //append the current document name to the list item
-                docNode.appendChild(docname);
-
-                //get the main div and append the 
+                //append the current list itema to the list
+                docNode.appendChild(listItem);
+                //get the ordered list and append the list item
                 document.getElementById("docs").appendChild(docNode);
             }
             //push current file metadata array to the global file collection array
-            fileCollection.push(arr);
+            fileCollection.push(metaArray);
         }
     };
 }
@@ -168,8 +173,6 @@ function getDocuments(url, recType, staticName) {
                 $SP().list(list[i].Name, url).get({
                     fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY" + staticName,
                     where: staticName + '="' + recType + '"'
-                        //static way
-                        //'Document_x0020_Type = "' + recType + '"'
                 }, getDocumentInfo());
             } else {
                 $SP().list(list[i].Name, url).get({
