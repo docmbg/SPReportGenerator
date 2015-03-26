@@ -162,6 +162,7 @@ function getDocumentInfo() {
 }
 
 function getDocuments(url, recType, staticName) {
+    var dfd = $.Deferred();
     $SP().lists({
         url: url
     }, function(list) {
@@ -181,6 +182,7 @@ function getDocuments(url, recType, staticName) {
             }
         }
     });
+    return dfd.promise();
 }
 
 function generateReport() {
@@ -190,6 +192,9 @@ function generateReport() {
     //depricated
     // var staticName = $SP().toXSLString($('#documentType option:selected').val());
     for (var i = 0; i < subs.length; i++) {
-        getDocuments(subs[i], recType, sName);
+        var data = getDocuments(subs[i], recType, sName);
+        data.done(function() {
+            console.log("All done here!");
+        });
     }
 }
