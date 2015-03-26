@@ -4,6 +4,11 @@ var subsites = [],
     excelHeader = ["Type", "Name", "Document Type", "FY", "Record Series Code", "Created By", "Modified By", "Created", "Last Modifed", "URL"],
     fileCollection = [excelHeader],
     ep = new ExcelPlus(),
+    today = new Date(),
+    dd = today.getDate(),
+    mm = today.getMonth() + 1,
+    year = today.getFullYear(),
+    today = year + "-" + mm + "-" + dd,
     sName;
 
 //create sheet to hold the information
@@ -17,9 +22,6 @@ function createFile(arr, fileName) {
     //finally save the file
     return ep.saveAs(fileName + ".xlsx");
 }
-
-//variable to hold the static name of the Document Type column
-
 
 function getCurrentSite() {
     var dfd = $.Deferred();
@@ -69,7 +71,7 @@ function genSitesArray() {
 }
 
 $(document).ready(function() {
-
+    $("#anim").hide();
     $("#checkAll").change(function() {
         $("input:checkbox").prop('checked', $(this).prop("checked"));
     });
@@ -77,6 +79,9 @@ $(document).ready(function() {
     $("#getFilesBtn").click(function(event) {
         event.preventDefault();
         genSitesArray().done(function() {
+            if (subsites.length === 0) {
+                alert("Please select at least one stie/subsite!");
+            }
             $('#docs').html("");
             fileCollection = [excelHeader];
             generateReport();
@@ -85,13 +90,13 @@ $(document).ready(function() {
 
     $("#downloadReportBtn").click(function(event) {
         event.preventDefault();
-        createFile(fileCollection, "GeneratedReport");
+        createFile(fileCollection, $('#recordTypes option:selected').text() + "_" + today);
     });
 
-    $('#docs').bind('contentchanged', function() {
-        // do something after the div content has changed
-        alert('woo');
-    });
+    // $('#docs').on('contentchanged unloaded', function() {
+    //     // do something after the content has changed
+    //     $("#anim").toggleClass(".show");
+    // });
 });
 
 function genCheckboxItem(title, url, elem) {
@@ -125,6 +130,8 @@ function getDocumentInfo() {
         if (error !== undefined) {
             console.log(error);
         }
+
+        var regExEmail = new RegExp(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i);
         console.log("Retrtieving documents for list...");
         //get info for fields returned
         for (var j = 0; j < data.length; j++) {
@@ -136,12 +143,13 @@ function getDocumentInfo() {
                 documentType = $SP().cleanResult(data[j].getAttribute(sName)),
                 fiscalYear = data[j].getAttribute("FY"),
                 rsc = data[j].getAttribute("TRIM"),
-                createdBy = $SP().cleanResult(data[j].getAttribute("Created_x0020_By")),
-                modifiedBy = $SP().cleanResult(data[j].getAttribute("Modified_x0020_By")),
+                createdBy = $SP().cleanResult(data[j].getAttribute("Author").match(regExEmail)).toString().split(',')[0],
+                modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor").match(regExEmail)).toString().split(',')[0],
                 created = $SP().cleanResult(data[j].getAttribute("Created_x0020_Date")),
                 modified = $SP().cleanResult(data[j].getAttribute("Last_x0020_Modified")),
                 absURL = data[j].getAttribute("EncodedAbsUrl");
 
+            console.log(data[j].getAttribute("Author"));
             //return fields thad only match the "Document" content type, which has id of 0x0101
             if (ctypeID == "0x0101") {
                 //log raw document file name and author in the console
@@ -178,6 +186,7 @@ function getDocumentInfo() {
                 docNode.appendChild(listItem);
                 //get the ordered list and append the list item
                 document.getElementById("docs").appendChild(docNode);
+                // $("#anim").trigger('contentchanged');
             }
             //push current file metadata array to the global file collection array
             fileCollection.push(metaArray);
@@ -192,14 +201,16 @@ function getDocuments(url, recType, staticName) {
         for (var i = 0; i < list.length; i++) {
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Modified_x0020_By,Created_x0020_By,Created_x0020_Date,Last_x0020_Modifiedm," + staticName,
-                    where: staticName + '="' + recType + '"'
+                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modifiedm," + staticName,
+                    where: staticName + '="' + recType + '"',
+                    expandUserField: true
                 }, getDocumentInfo());
             } else {
                 $SP().list(list[i].Name, url).get({
-                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Modified_x0020_By,Created_x0020_By,Created_x0020_Date,Last_x0020_Modified," + staticName,
-                    // where: staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
-                }, getDocumentInfo());
+                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
+                    expandUserField: true
+                        // where: staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
+                }, getDocumentInfo(), $("#anim").trigger('unloaded'));
             }
         }
     });
