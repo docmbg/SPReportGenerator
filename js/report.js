@@ -47,7 +47,7 @@ function getStaticName() {
                 dfd.resolve(fields[i].StaticName);
 
                 for (var choice in fields[i].Choices) {
-                    console.log(fields[i].Choices[choice]);
+                    // console.log(fields[i].Choices[choice]);
                     var recTypeSelect = document.getElementById("recordTypes");
                     recTypeSelect.options[recTypeSelect.options.length] =
                         new Option(fields[i].Choices[choice], fields[i].Choices[choice]);
@@ -114,10 +114,10 @@ $().SPServices({
     operation: "GetAllSubWebCollection",
     async: true,
     completefunc: function(xData) {
-        console.log(xData.responseText);
+        // console.log(xData.responseText);
         $(xData.responseXML).find("Webs > Web").each(function() {
             var $node = $(this);
-            console.log($node.attr("Title") + ", " + $node.attr("Url"));
+            // console.log($node.attr("Title") + ", " + $node.attr("Url"));
             genCheckboxItem($node.attr("Title"), $node.attr("Url"), '#subsites');
         });
     }
@@ -143,8 +143,10 @@ function getDocumentInfo() {
                 documentType = $SP().cleanResult(data[j].getAttribute(sName)),
                 fiscalYear = data[j].getAttribute("FY"),
                 rsc = data[j].getAttribute("TRIM"),
-                createdBy = $SP().cleanResult(data[j].getAttribute("Author").match(regExEmail)).toString().split(',')[0],
-                modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor").match(regExEmail)).toString().split(',')[0],
+                createdBy = $SP().cleanResult(data[j].getAttribute("Author")
+                    .match(regExEmail)).toString().split(',')[0],
+                modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor")
+                    .match(regExEmail)).toString().split(',')[0],
                 created = $SP().cleanResult(data[j].getAttribute("Created_x0020_Date")),
                 modified = $SP().cleanResult(data[j].getAttribute("Last_x0020_Modified")),
                 absURL = data[j].getAttribute("EncodedAbsUrl");
