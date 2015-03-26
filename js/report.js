@@ -1,12 +1,13 @@
 /* jshint -W110 */
 
 var subsites = [],
-    fileCollection = [],
+    excelHeader = ["Type", "Name", "Document Type", "FY", "Record Series Code", "Created By", "Modified By", "Created", "Last Modifed", "URL"],
+    fileCollection = [excelHeader],
     ep = new ExcelPlus(),
     sName;
 
 //create sheet to hold the information
-ep.createFile("Sheet1");
+ep.createFile("Report");
 
 function createFile(arr, fileName) {
     //simply give the write method the 2d array as content value
@@ -77,7 +78,7 @@ $(document).ready(function() {
         event.preventDefault();
         genSitesArray().done(function() {
             $('#docs').html("");
-            fileCollection = [];
+            fileCollection = [excelHeader];
             generateReport();
         });
     });
@@ -85,6 +86,11 @@ $(document).ready(function() {
     $("#downloadReportBtn").click(function(event) {
         event.preventDefault();
         createFile(fileCollection, "GeneratedReport");
+    });
+
+    $('#docs').bind('contentchanged', function() {
+        // do something after the div content has changed
+        alert('woo');
     });
 });
 
@@ -124,23 +130,26 @@ function getDocumentInfo() {
         for (var j = 0; j < data.length; j++) {
             //an array to hold the metadata information for each file
             var metaArray = [],
-                rsc = data[j].getAttribute("TRIM"),
-                fiscalYear = data[j].getAttribute("FY"),
-                createdBy = $SP().cleanResult(data[j].getAttribute("Author")),
-                absURL = data[j].getAttribute("EncodedAbsUrl"),
-                modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor")),
+                ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6),
+                type = data[j].getAttribute("DocIcon"),
+                fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef")),
                 documentType = $SP().cleanResult(data[j].getAttribute(sName)),
-                ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6);
+                fiscalYear = data[j].getAttribute("FY"),
+                rsc = data[j].getAttribute("TRIM"),
+                createdBy = $SP().cleanResult(data[j].getAttribute("Created_x0020_By")),
+                modifiedBy = $SP().cleanResult(data[j].getAttribute("Modified_x0020_By")),
+                created = $SP().cleanResult(data[j].getAttribute("Created_x0020_Date")),
+                modified = $SP().cleanResult(data[j].getAttribute("Last_x0020_Modified")),
+                absURL = data[j].getAttribute("EncodedAbsUrl");
 
             //return fields thad only match the "Document" content type, which has id of 0x0101
             if (ctypeID == "0x0101") {
                 //log raw document file name and author in the console
                 console.log(data[j].getAttribute("FileLeafRef"));
-               
+
                 //create new list item element
                 var docNode = document.createElement("li"),
                     //save the raw document file name
-                    fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef")),
                     //prepare the string to be used as item in the ordered list #docs
                     listItem = document.createTextNode(
                         fileName +
@@ -150,8 +159,20 @@ function getDocumentInfo() {
                         ", Created By: " + createdBy +
                         ", Modified By: " + modifiedBy
                     );
+
                 //push metadata info into the current scope array
-                metaArray.push(fileName, documentType, rsc, fiscalYear, createdBy, modifiedBy, absURL);
+                metaArray.push(
+                    type,
+                    fileName,
+                    documentType,
+                    fiscalYear,
+                    rsc,
+                    createdBy,
+                    modifiedBy,
+                    created,
+                    modified,
+                    absURL
+                );
 
                 //append the current list itema to the list
                 docNode.appendChild(listItem);
@@ -171,12 +192,12 @@ function getDocuments(url, recType, staticName) {
         for (var i = 0; i < list.length; i++) {
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY" + staticName,
+                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Modified_x0020_By,Created_x0020_By,Created_x0020_Date,Last_x0020_Modifiedm," + staticName,
                     where: staticName + '="' + recType + '"'
                 }, getDocumentInfo());
             } else {
                 $SP().list(list[i].Name, url).get({
-                    fields: "EncodedAbsUrl, Editor,TRIM,FileLeafRef,ContentTypeId,Author,FY," + staticName,
+                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Modified_x0020_By,Created_x0020_By,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     // where: staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
                 }, getDocumentInfo());
             }

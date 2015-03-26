@@ -9,7 +9,8 @@
         "jQuery": false,
         "console": false,
         "$": false,
-        "ExcelPlus": false
+        "ExcelPlus": false,
+        "alert": false
     },
     "globalstrict": false,
     "quotmark": true,
