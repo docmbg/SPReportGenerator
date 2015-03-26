@@ -203,7 +203,7 @@ function getDocuments(url, recType, staticName) {
         for (var i = 0; i < list.length; i++) {
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modifiedm," + staticName,
+                    fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     where: staticName + '="' + recType + '"',
                     expandUserField: true
                 }, getDocumentInfo());
