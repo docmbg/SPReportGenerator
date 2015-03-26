@@ -8,7 +8,8 @@
         "$SP": false,
         "jQuery": false,
         "console": false,
-        "$": false
+        "$": false,
+        "ExcelPlus": false
     },
     "globalstrict": false,
     "quotmark": true,

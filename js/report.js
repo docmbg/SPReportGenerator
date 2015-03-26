@@ -1,24 +1,22 @@
 /* jshint -W110 */
 
-var subsites = [];
-var fileCollection = [];
-
-var ep = new ExcelPlus();
-//add a sheet to the file to store the data
+var subsites = [],
+    fileCollection = [],
+    ep = new ExcelPlus(),
+    sName;
 ep.createFile("Sheet1");
 
-
-function createFile(arg, name) {
+function createFile(arr, fileName) {
     //simply give the write method the 2d array as content value
     ep.write({
-        "content": arg
+        "content": arr
     });
     //finally save the file
-    return ep.saveAs(name + ".xlsx");
+    return ep.saveAs(fileName + ".xlsx");
 }
 
 //variable to hold the static name of the Document Type column
-var sName;
+
 
 function getCurrentSite() {
     var dfd = $.Deferred();
@@ -162,7 +160,6 @@ function getDocumentInfo() {
 }
 
 function getDocuments(url, recType, staticName) {
-    var dfd = $.Deferred();
     $SP().lists({
         url: url
     }, function(list) {
@@ -182,19 +179,13 @@ function getDocuments(url, recType, staticName) {
             }
         }
     });
-    return dfd.promise();
 }
 
 function generateReport() {
     console.log("Getting documents...");
-    var subs = subsites;
     var recType = $('#recordTypes option:selected').text();
-    //depricated
-    // var staticName = $SP().toXSLString($('#documentType option:selected').val());
-    for (var i = 0; i < subs.length; i++) {
-        var data = getDocuments(subs[i], recType, sName);
-        data.done(function() {
-            console.log("All done here!");
-        });
+
+    for (var i = 0; i < subsites.length; i++) {
+        getDocuments(subsites[i], recType, sName);
     }
 }
