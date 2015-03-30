@@ -28,8 +28,6 @@ function getCurrentSite() {
     dfd.resolve($().SPServices.SPGetCurrentSite());
     return dfd.promise();
 }
-
-
 // will use in RIST Page
 function getStaticName() {
     var currentSite;
