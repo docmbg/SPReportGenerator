@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -9,11 +9,11 @@
     <meta http-equiv='pragma' content='no-cache'>
     <title>ReportGenerator</title>
     <script type="text/javascript">
-    if (!window.console) {
-        console = {
-            log: function() {}
-        };
-    }
+        if (!window.console) {
+            console = {
+                log: function () { }
+            };
+        }
     </script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
@@ -21,31 +21,33 @@
     <script type="text/javascript" src="../libraries/xlsx.core.min.js"></script>
     <script type="text/javascript" src="../libraries/excelplus-2.2.min.js"></script>
     <script type="text/javascript" src="../js/report.js"></script>
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
+
 </head>
 
 <body>
     <select name="recordTypes" id="recordTypes">
         <option value "All Types">All Types</option>
     </select>
-    <span><input type="button" value="Get Files" id="getFilesBtn"></span>
+    <span><input class="button primary" type="button" value="Get Files" id="getFilesBtn"></span>
     <div>
         <p>
             <label>
-                <input type="checkbox" id="checkAll" />Select all</label>
+                <input class="chkbox" type="checkbox" id="checkAll" />Select all
+            </label>
         </p>
     </div>
     <div id="subsites"></div>
     <br>
-    <input type="button" value="Give me da excel" id="downloadReportBtn">
+    <input type="button" value="Download report" id="downloadReportBtn" disabled>
     <hr>
     <div>
-        <div id="anim">
-            <img src="http://smallenvelop.com/wp-content/uploads/2014/08/Preloader_9.gif">
+        <div id="progress">
+            <p></p>
         </div>
         <ol id="docs" type="1"></ol>
     </div>
     <div id="error" style="color:red;"></div>
+
 </body>
 
 </html>

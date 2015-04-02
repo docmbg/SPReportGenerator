@@ -9,7 +9,9 @@ var subsites = [],
     mm = today.getMonth() + 1,
     year = today.getFullYear(),
     today = year + "-" + mm + "-" + dd,
-    sName;
+    sName,
+    listCount = [],
+    procdLists = [];
 
 //create sheet to hold the information
 ep.createFile("Report");
@@ -28,17 +30,18 @@ function getCurrentSite() {
     dfd.resolve($().SPServices.SPGetCurrentSite());
     return dfd.promise();
 }
+
 // will use in RIST Page
 function getStaticName() {
     var currentSite;
 
-    getCurrentSite().done(function(dfdResolve) {
+    getCurrentSite().done(function (dfdResolve) {
         currentSite = dfdResolve;
     });
 
     var dfd = $.Deferred();
 
-    $SP().list("Inactive Records", currentSite).info(function(fields) {
+    $SP().list("Inactive Records", currentSite).info(function (fields) {
         for (var i = 0; i < fields.length; i++) {
             if (fields[i].DisplayName === "Document Type") {
 
@@ -56,37 +59,40 @@ function getStaticName() {
     return dfd.promise();
 }
 
-getStaticName().done(function(a) {
+getStaticName().done(function (a) {
     sName = a;
 });
 
 function genSitesArray() {
     console.log("Generating array of sub-sites");
-    subsites = $("#subsites input:checkbox:checked").map(function() {
+    subsites = $("#subsites input:checkbox:checked").map(function () {
         return $(this).val();
     }).get();
     return $.Deferred().resolve(false);
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     $("#anim").hide();
-    $("#checkAll").change(function() {
+    $("#checkAll").change(function () {
         $("input:checkbox").prop('checked', $(this).prop("checked"));
     });
 
-    $("#getFilesBtn").click(function(event) {
+    $("#getFilesBtn").click(function (event) {
         event.preventDefault();
-        genSitesArray().done(function() {
+
+        genSitesArray().done(function () {
             if (subsites.length === 0) {
                 alert("Please select at least one stie/subsite!");
             }
             $('#docs').html("");
             fileCollection = [excelHeader];
+            listCount = [],
+            procdLists = [],
             generateReport();
         });
     });
 
-    $("#downloadReportBtn").click(function(event) {
+    $("#downloadReportBtn").click(function (event) {
         event.preventDefault();
         createFile(fileCollection, $('#recordTypes option:selected').text() + "_" + today);
     });
@@ -99,11 +105,11 @@ $(document).ready(function() {
 
 function genCheckboxItem(title, url, elem) {
     var checkboxItem = $('<input type="checkbox" />').attr({
-            id: title,
-            'class': 'subsite',
-            name: 'subsite',
-            value: url
-        }),
+        id: title,
+        'class': 'subsite',
+        name: 'subsite',
+        value: url
+    }),
         label = $('<label for="' + title + '"/>').html(title);
     $(elem).append(checkboxItem, label, $('<br>'));
 }
@@ -111,9 +117,9 @@ function genCheckboxItem(title, url, elem) {
 $().SPServices({
     operation: "GetAllSubWebCollection",
     async: true,
-    completefunc: function(xData) {
+    completefunc: function (xData) {
         // console.log(xData.responseText);
-        $(xData.responseXML).find("Webs > Web").each(function() {
+        $(xData.responseXML).find("Webs > Web").each(function () {
             var $node = $(this);
             // console.log($node.attr("Title") + ", " + $node.attr("Url"));
             genCheckboxItem($node.attr("Title"), $node.attr("Url"), '#subsites');
@@ -121,18 +127,30 @@ $().SPServices({
     }
 });
 
+
+
+function progress(count, all) {
+    var result = Math.floor((count.length / all.length) * 100);
+
+    var textNode = document.createTextNode(result + "% Done.");
+    $("#progress > p").html(textNode);
+
+    return result;
+}
+
 function getDocumentInfo() {
     //return the data for current list field that matches the document type
-    return function getData(data, error) {
+    return function (data, error) {
+
         //show errors in console if exist
         if (error !== undefined) {
             console.log(error);
         }
-
         var regExEmail = new RegExp(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i);
         console.log("Retrtieving documents for list...");
         //get info for fields returned
         for (var j = 0; j < data.length; j++) {
+
             //an array to hold the metadata information for each file
             var metaArray = [],
                 ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6),
@@ -162,12 +180,10 @@ function getDocumentInfo() {
                     listItem = document.createTextNode(
                         fileName +
                         ", URL: " + absURL +
-                        ", RS Code: " + rsc +
                         ", Fiscal Year: " + fiscalYear +
                         ", Created By: " + createdBy +
                         ", Modified By: " + modifiedBy
                     );
-
                 //push metadata info into the current scope array
                 metaArray.push(
                     type,
@@ -181,7 +197,6 @@ function getDocumentInfo() {
                     modified,
                     absURL
                 );
-
                 //append the current list itema to the list
                 docNode.appendChild(listItem);
                 //get the ordered list and append the list item
@@ -191,14 +206,23 @@ function getDocumentInfo() {
             //push current file metadata array to the global file collection array
             fileCollection.push(metaArray);
         }
+        procdLists.push("done");
+        progress(procdLists, listCount);
+        if (progress(procdLists, listCount) < 100) {
+            $("#downloadReportBtn").prop("disabled", true);
+        } else {
+            $("#downloadReportBtn").prop("disabled", false);
+        }
     };
 }
 
 function getDocuments(url, recType, staticName) {
     $SP().lists({
         url: url
-    }, function(list) {
+    }, function (list) {
         for (var i = 0; i < list.length; i++) {
+            console.log("=====================Initiated get documents method!=====================");
+            listCount.push(list[i].Name);
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
                     fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
@@ -209,8 +233,8 @@ function getDocuments(url, recType, staticName) {
                 $SP().list(list[i].Name, url).get({
                     fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     expandUserField: true
-                        // where: staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
-                }, getDocumentInfo(), $("#anim").trigger('unloaded'));
+                    // where: staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
+                }, getDocumentInfo());
             }
         }
     });
