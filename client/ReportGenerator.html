@@ -6,8 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv='cache-control' content='no-cache'>
     <meta http-equiv='expires' content='0'>
-    <meta http-equiv='pragma' content='no-cache'>
+    <!--<meta http-equiv='pragma' content='no-cache'>-->
     <title>ReportGenerator</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.0/css/materialize.min.css">
+    <link href="../css/progressjs.min.css" rel="stylesheet" />
+    <link href="../css/style.css" rel="stylesheet" />
     <script type="text/javascript">
         if (!window.console) {
             console = {
@@ -15,9 +19,12 @@
             };
         }
     </script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/sharepointplus/3.0.10/sharepointplus.min.js"></script>
+    <script type="text/javascript" src="../libraries/sharepointplus-3.0.10.js"></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="../libraries/progress.min.js"></script>
     <script type="text/javascript" src="../libraries/xlsx.core.min.js"></script>
     <script type="text/javascript" src="../libraries/excelplus-2.2.min.js"></script>
     <script type="text/javascript" src="../js/report.js"></script>
@@ -25,29 +32,125 @@
 </head>
 
 <body>
-    <select name="recordTypes" id="recordTypes">
-        <option value "All Types">All Types</option>
-    </select>
-    <span><input class="button primary" type="button" value="Get Files" id="getFilesBtn"></span>
-    <div>
-        <p>
-            <label>
-                <input class="chkbox" type="checkbox" id="checkAll" />Select all
-            </label>
-        </p>
-    </div>
-    <div id="subsites"></div>
-    <br>
-    <input type="button" value="Download report" id="downloadReportBtn" disabled>
-    <hr>
-    <div>
-        <div id="progress">
-            <p></p>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo center"><b>HP ONE FILE</b> Report Generator</a>
+            <img src="../img/HPR_Blue_RGB_150_MD.png" alt="HP Logo" />
+            <a href="#" data-activates="mobile" class="button-collapse right"><i class="mdi-navigation-menu"></i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="#"><i class="mdi-action-home"></i></a></li>
+                <li><a href="#">Instructions</a></li>
+                <li><a href="#">Changelog</a></li>
+                <li><a href="#">ver. 1.0</a></li>
+            </ul>
+            <ul id="mobile" class="side-nav">
+                <li><a href="#">Instructions</a></li>
+                <li><a href="#">Changelog</a></li>
+                <li><a href="#">ver. 1.0</a></li>
+            </ul>
         </div>
-        <ol id="docs" type="1"></ol>
+    </nav>
+    <br />
+    <div class="container">
+        <div class="section">
+            <div class="row">
+                <div class="col s6">
+                    <div class="row">
+                        <div class="col s12" id="reportContainer">
+                            <ul class="collection">
+                                <li class="collection-item">
+                                    <h5>RECORDS MANAGEMENT REPORT</h5>
+                                </li>
+                                <li class="collection-item avatar">
+                                    <i class="mdi-file-folder circle green"></i>
+                                    <span class="title"><b>Active Records</b></span>
+                                    <p>
+                                        0 Files <br>
+                                        0% of Total
+                                    </p>
+                                    <a href="#!" class="secondary-content"><i class="mdi-action-info-outline"></i></a>
+                                </li>
+                                <li class="collection-item avatar">
+                                    <i class="mdi-file-folder circle red"></i>
+                                    <span class="title"><b>Inactive Records</b></span>
+                                    <p>
+                                        0 Files <br>
+                                        0% of Total
+                                    </p>
+                                    <a href="#!" class="secondary-content"><i class="mdi-action-info-outline"></i></a>
+                                </li>
+                                <li class="collection-item avatar">
+                                    <i class="mdi-file-folder circle orange"></i>
+                                    <span class="title"><b>Unspecified</b></span>
+                                    <p>
+                                        0 Files <br>
+                                        0% of Total
+                                    </p>
+                                    <a href="#!" class="secondary-content"><i class="mdi-action-info-outline"></i></a>
+                                </li>
+                                <li class="collection-item avatar">
+                                    <i class="mdi-file-folder circle brown"></i>
+                                    <span class="title"><b>Non-Records</b></span>
+                                    <p>
+                                        0 Files <br>
+                                        0% of Total
+                                    </p>
+                                    <a href="#!" class="secondary-content"><i class="mdi-action-info-outline"></i></a>
+                                </li>
+                                <li class="collection-item avatar">
+                                    <i class="mdi-file-folder circle"></i>
+                                    <span class="title"><b>Other</b></span>
+                                    <p>
+                                        0 Files <br>
+                                        0% of Total
+                                    </p>
+                                    <a href="#!" class="secondary-content"><i class="mdi-action-info-outline"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12" id="statusBar">
+                            <div class="card-panel white" id="progressBar">
+                                <span class="black-text">
+                                    <p class="center-align"><b>STATUS: </b><span id="progress">YOUR QUERY PROGRESS WILL APPEAR HERE</span></p>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s6">
+                    <div class="row">
+                        <div class="col s6">
+                            <select class="browser-default" name="recordTypes" id="recordTypes">
+                                <option value="All Types">All Documents</option>
+                            </select>
+                        </div>
+                        <div class="col s6">
+                            <a class="waves-effect waves-light btn" id="getFilesBtn"><i class="mdi-editor-insert-drive-file left"></i>get files</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12" id="sitesContainer">
+                            <input type="checkbox" id="checkAll" />
+                            <label for="checkAll"><b>Select/Deselect All</b></label>
+                            <div id="subsites"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fixed-action-btn" id="actionButtons" style="bottom: 45px; right: 45px;">
+                <a class="btn-floating btn-large disabled" id="downloadReportBtn"><i class="mdi-file-file-download left"></i></a>
+                <ul>
+                    <li>
+                        <a class="btn-floating red" id="cancelProgress">
+                            <i class="large mdi-navigation-cancel"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <div id="error" style="color:red;"></div>
-
 </body>
 
 </html>

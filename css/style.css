@@ -1,3 +1,73 @@
-.show {
-	visibility: visible;
+.nav-wrapper{
+    background: #0096D6;
+}
+
+.nav-wrapper >img {
+    margin-left: 10px;
+    display:inline-block;
+    vertical-align: middle;
+}
+
+.btn, .btn:hover, .btn-large, .btn-large:hover {
+    background-color: #0096D6;
+    height: 44px;
+    line-height: 44px;
+}
+
+.btn-floating.btn-large {
+    width: 55.5px;
+    height: 55.5px;
+}
+
+select {
+    background: transparent;
+    border: 1px solid #E0E0E0;
+}
+
+    select:focus {
+        outline: #0096D6;
+    }
+
+#circleProgress > svg {
+    display: block;
+    width: 100%;
+}
+
+#progress {
+    color: #0096D6;
+}
+
+label {
+    color: #272727;
+}
+
+[type="checkbox"].filled-in:checked + label:after {
+    border: 2px solid #0096D6;
+    background-color: #0096D6;
+}
+
+[type="checkbox"]:not(:checked) + label:before {
+    border: 1px solid;
+    color: #e0e0e0;
+}
+
+[type="checkbox"]:checked + label:before {
+    border-right: 2px solid #0096D6;
+    border-bottom: 2px solid #0096D6;
+}
+
+#statusBar {
+    font-size: 1em;
+}
+
+#sitesContainer {
+    margin-top: 6px;
+}
+
+.secondary-content {
+    color: #0096D6;
+}
+
+.collection {
+    margin-top: 0;
 }

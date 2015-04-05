@@ -1,8 +1,8 @@
 /* jshint -W110 */
 
 var subsites = [],
-    excelHeader = ["Type", "Name", "Document Type", "FY", "Record Series Code", "Created By", "Modified By", "Created", "Last Modifed", "URL"],
     fileCollection = [excelHeader],
+    excelHeader = ["Type", "Name", "Document Type", "FY", "Record Series Code", "Created By", "Modified By", "Created", "Last Modifed", "URL"],
     ep = new ExcelPlus(),
     today = new Date(),
     dd = today.getDate(),
@@ -11,18 +11,54 @@ var subsites = [],
     today = year + "-" + mm + "-" + dd,
     sName,
     listCount = [],
-    procdLists = [];
+    procdLists = [],
+    rows = [],
+    rowNumber = 0;
 
-//create sheet to hold the information
-ep.createFile("Report");
-
-function createFile(arr, fileName) {
-    //simply give the write method the 2d array as content value
-    ep.write({
-        "content": arr
+function executeFileSave() {
+    $.p.end();
+    $("#progress").html(" " + rows.length + " FILES COLLECTED");
+    $("#downloadReportBtn").attr("class", "btn-floating btn-large");
+    $("#cancelProgress").hide();
+    $("#downloadReportBtn").click(function (event) {
+        event.preventDefault();
+        if (!!window.Worker) {
+            var worker = new Worker("../js/saveFileWorker.js");
+            worker.onmessage = function (e) {
+                if (e.data == "working") {
+                    Materialize.toast('Generating excel file. Be patient!', 4000) // 2000 is the duration of the toast
+                    $("#downloadReportBtn").unbind("click");
+                    $("#downloadReportBtn").html("<i class='mdi-action-cached left'></i>");
+                    $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
+                } else {
+                    saveExcelFile(e.data, $('#recordTypes option:selected').text() + "_" + today);
+                    $("#downloadReportBtn").attr("class", "btn-floating btn-large green accent-3");
+                    $("#downloadReportBtn").html("<i class='mdi-action-done left'></i>");
+                }
+            }
+            worker.postMessage([ep]);
+        }
     });
-    //finally save the file
-    return ep.saveAs(fileName + ".xlsx");
+}
+
+function saveExcelFile(data, fileName) {
+    //set the file name
+    var filename = fileName + ".xlsx";
+    //check for browser compatability
+    //if (typeof Uint8Array === "undefined") {
+    //    this.error = "[saveAs] Sorry but this function is only supported by modern browsers";
+    //    this._showErrors();
+    //    return this;
+    //}
+    //put the file stream together
+    var s2ab = function (s) {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+    }
+    //invoke the saveAs method from FileSaver.js
+    saveAs(new Blob([s2ab(data)], { type: "application/octet-stream" }), filename);
 }
 
 function getCurrentSite() {
@@ -72,35 +108,34 @@ function genSitesArray() {
 }
 
 $(document).ready(function () {
-    $("#anim").hide();
+    $(".button-collapse").sideNav();
+    $("#cancelProgress").hide();
     $("#checkAll").change(function () {
         $("input:checkbox").prop('checked', $(this).prop("checked"));
     });
 
     $("#getFilesBtn").click(function (event) {
+        ep.createFile("Report");
+        ep.write({
+            "content": [excelHeader]
+        });
+        $("#downloadReportBtn").html("<i class='mdi-file-file-download left'></i>");
+        //$("#docsContainer").css('height', $("#sitesContainer").css('height'));
+        $.p = progressJs("#progressBar").start();
         event.preventDefault();
-
         genSitesArray().done(function () {
             if (subsites.length === 0) {
-                alert("Please select at least one stie/subsite!");
+                $.p.end();
+                Materialize.toast('Please select at least one stie/subsite!', 2000) // 2000 is the duration of the toast
             }
-            $('#docs').html("");
+            $('#reportCollection >li >p').html("0 Files <br>0% of Total");
+            rows = [];
             fileCollection = [excelHeader];
-            listCount = [],
-            procdLists = [],
+            listCount = [];
+            procdLists = [];
             generateReport();
         });
     });
-
-    $("#downloadReportBtn").click(function (event) {
-        event.preventDefault();
-        createFile(fileCollection, $('#recordTypes option:selected').text() + "_" + today);
-    });
-
-    // $('#docs').on('contentchanged unloaded', function() {
-    //     // do something after the content has changed
-    //     $("#anim").toggleClass(".show");
-    // });
 });
 
 function genCheckboxItem(title, url, elem) {
@@ -128,90 +163,167 @@ $().SPServices({
 });
 
 
-
 function progress(count, all) {
     var result = Math.floor((count.length / all.length) * 100);
 
-    var textNode = document.createTextNode(result + "% Done.");
-    $("#progress > p").html(textNode);
+    var textNode = document.createTextNode(" " + result + "% OF QUERY FILES COLLECTED");
+    $("#progress").html(textNode);
 
     return result;
 }
 
 function getDocumentInfo() {
-    //return the data for current list field that matches the document type
-    return function (data, error) {
 
+    //return the data for current list field that matches the document type
+    return function (data) {
         //show errors in console if exist
-        if (error !== undefined) {
-            console.log(error);
-        }
+        //if (error !== undefined) {
+        //    console.log(error);
+        //}
         var regExEmail = new RegExp(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i);
-        console.log("Retrtieving documents for list...");
+        //console.log("Retrtieving documents for list...");
         //get info for fields returned
         for (var j = 0; j < data.length; j++) {
-
+            //ignore sharepointplus ajax error
             //an array to hold the metadata information for each file
-            var metaArray = [],
-                ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6),
-                type = data[j].getAttribute("DocIcon"),
-                fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef")),
-                documentType = $SP().cleanResult(data[j].getAttribute(sName)),
-                fiscalYear = data[j].getAttribute("FY"),
-                rsc = data[j].getAttribute("TRIM"),
-                createdBy = $SP().cleanResult(data[j].getAttribute("Author")
-                    .match(regExEmail)).toString().split(',')[0],
-                modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor")
-                    .match(regExEmail)).toString().split(',')[0],
-                created = $SP().cleanResult(data[j].getAttribute("Created_x0020_Date")),
-                modified = $SP().cleanResult(data[j].getAttribute("Last_x0020_Modified")),
-                absURL = data[j].getAttribute("EncodedAbsUrl");
 
-            console.log(data[j].getAttribute("Author"));
+            var ctypeID = data[j].getAttribute("ContentTypeId").substring(0, 6),
+                        type = data[j].getAttribute("DocIcon"),
+                        fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef")),
+                        documentType = $SP().cleanResult(data[j].getAttribute(sName)).toString(),
+                        fiscalYear = data[j].getAttribute("FY"),
+                        recordCode = data[j].getAttribute("TRIM"),
+                        createdBy = $SP().cleanResult(data[j].getAttribute("Author")
+                            .match(regExEmail)).toString().split(',')[0],
+                        modifiedBy = $SP().cleanResult(data[j].getAttribute("Editor")
+                            .match(regExEmail)).toString().split(',')[0],
+                        created = $SP().cleanResult(data[j].getAttribute("Created_x0020_Date")),
+                        modified = $SP().cleanResult(data[j].getAttribute("Last_x0020_Modified")),
+                        absURL = data[j].getAttribute("EncodedAbsUrl");
+
+
+            //console.log("Record Code: " + data[j].getAttribute("TRIM") + ";");
+            //console.log("Document Type: " + documentType + ";");
+            //console.log("Fiscal Year: " + fiscalYear + ";");
+            //console.log("Type: " + type);
             //return fields thad only match the "Document" content type, which has id of 0x0101
-            if (ctypeID == "0x0101") {
+            if (ctypeID == "0x0101" &&
+                type !== "master" &&
+                type !== "aspx" &&
+                type !== "png" &&
+                type !== "gif" &&
+                type !== "xsl" &&
+                type !== "xoml" &&
+                type !== "jpg" &&
+                type !== "xml" &&
+                type !== "xsn" &&
+                type !== "css" &&
+                type !== "xaml" &&
+                type !== "rules") {
+
+                rowNumber += 1;
+                rows.push(rowNumber);
+
+                if (type !== null) {
+                    ep.write({
+                        "cell": "A" + (rows.length + 1),
+                        "content": type
+                    });
+                }
+
+                if (type !== null) {
+                    ep.write({
+                        "cell": "B" + (rows.length + 1),
+                        "content": fileName
+                    });
+                }
+
+                if (documentType.length >= 1) {
+                    ep.write({
+                        "cell": "C" + (rows.length + 1),
+                        "content": documentType
+                    });
+                }
+
+                if (fiscalYear !== null) {
+                    ep.write({
+                        "cell": "D" + (rows.length + 1),
+                        "content": fiscalYear
+                    });
+                }
+
+                if (recordCode !== null) {
+                    ep.write({
+                        "cell": "E" + (rows.length + 1),
+                        "content": recordCode
+                    });
+                }
+
+                if (createdBy.length >= 1) {
+                    ep.write({
+                        "cell": "F" + (rows.length + 1),
+                        "content": createdBy + ""
+                    });
+                }
+
+                if (modifiedBy.length >= 1) {
+                    ep.write({
+                        "cell": "G" + (rows.length + 1),
+                        "content": modifiedBy + ""
+                    });
+                }
+
+                if (created !== null) {
+                    ep.write({
+                        "cell": "H" + (rows.length + 1),
+                        "content": created + ""
+                    });
+                }
+
+                if (modified !== null) {
+                    ep.write({
+                        "cell": "I" + (rows.length + 1),
+                        "content": modified + ""
+                    });
+                }
+
+                if (absURL !== null) {
+                    ep.write({
+                        "cell": "J" + (rows.length + 1),
+                        "content": absURL + ""
+                    });
+                }
+
                 //log raw document file name and author in the console
-                console.log(data[j].getAttribute("FileLeafRef"));
+                //console.log(data[j].getAttribute("FileLeafRef"));
+
 
                 //create new list item element
-                var docNode = document.createElement("li"),
-                    //save the raw document file name
-                    //prepare the string to be used as item in the ordered list #docs
-                    listItem = document.createTextNode(
-                        fileName +
-                        ", URL: " + absURL +
-                        ", Fiscal Year: " + fiscalYear +
-                        ", Created By: " + createdBy +
-                        ", Modified By: " + modifiedBy
-                    );
-                //push metadata info into the current scope array
-                metaArray.push(
-                    type,
-                    fileName,
-                    documentType,
-                    fiscalYear,
-                    rsc,
-                    createdBy,
-                    modifiedBy,
-                    created,
-                    modified,
-                    absURL
-                );
-                //append the current list itema to the list
-                docNode.appendChild(listItem);
+                //var li = "<li class='collection-item avatar'><i class='mdi-file-folder circle blue'></i>" +
+                //    "<span class='title'><b>" + fileName + "</b></span>" +
+                //    "<p><b>Created by: </b>" + createdBy + "<br>" +
+                //    "<b>Modified by: </b>" + modifiedBy + "</p>" +
+                //    "<a href='" + absURL + "' class='secondary-content'><i class='mdi-file-file-download'></i></a>" +
+                //    "</li>";
+
                 //get the ordered list and append the list item
-                document.getElementById("docs").appendChild(docNode);
-                // $("#anim").trigger('contentchanged');
+                //$("#docs").append(li);
             }
-            //push current file metadata array to the global file collection array
-            fileCollection.push(metaArray);
+            //push li variable to the jStorage local storage
         }
-        procdLists.push("done");
-        progress(procdLists, listCount);
+        procdLists.push('d');
+        //progress(procdLists, listCount);
+        $.p.set(progress(procdLists, listCount));
         if (progress(procdLists, listCount) < 100) {
-            $("#downloadReportBtn").prop("disabled", true);
+            $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
+            $("#downloadReportBtn").unbind("click");
+            $("#cancelProgress").show();
+            $("#cancelProgress").click(function () {
+                executeFileSave();
+                prevent.default();
+            });
         } else {
-            $("#downloadReportBtn").prop("disabled", false);
+            executeFileSave();
         }
     };
 }
@@ -221,8 +333,9 @@ function getDocuments(url, recType, staticName) {
         url: url
     }, function (list) {
         for (var i = 0; i < list.length; i++) {
-            console.log("=====================Initiated get documents method!=====================");
-            listCount.push(list[i].Name);
+            if (list.length) {
+                listCount.push(list[i].Name);
+            }
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
                     fields: "ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
@@ -242,7 +355,7 @@ function getDocuments(url, recType, staticName) {
 
 function generateReport() {
     console.log("Getting documents...");
-    var recType = $('#recordTypes option:selected').text();
+    var recType = $('#recordTypes option:selected').val();
 
     for (var i = 0; i < subsites.length; i++) {
         getDocuments(subsites[i], recType, sName);

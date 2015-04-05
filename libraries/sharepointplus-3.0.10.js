@@ -1154,7 +1154,7 @@ if (typeof jQuery === "function") {
                                 fct.call(_this,(setup.results.length>0?setup.results:aReturn));
                               }
                             }
-                      },
+                     },
                       error:function(jqXHR, textStatus, errorThrown) {
                         var res = jqXHR.responseXML;
                         var err = res.getElementsByTagName("errorstring");
