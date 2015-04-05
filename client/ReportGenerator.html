@@ -38,15 +38,13 @@
             <img src="../img/HPR_Blue_RGB_150_MD.png" alt="HP Logo" />
             <a href="#" data-activates="mobile" class="button-collapse right"><i class="mdi-navigation-menu"></i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="#"><i class="mdi-action-home"></i></a></li>
                 <li><a href="#">Instructions</a></li>
                 <li><a href="#">Changelog</a></li>
-                <li><a href="#">ver. 1.0</a></li>
+                <li id="version"><a href="#"></a></li>
             </ul>
             <ul id="mobile" class="side-nav">
                 <li><a href="#">Instructions</a></li>
                 <li><a href="#">Changelog</a></li>
-                <li><a href="#">ver. 1.0</a></li>
             </ul>
         </div>
     </nav>
@@ -64,7 +62,7 @@
                                 <li class="collection-item avatar">
                                     <i class="mdi-file-folder circle green"></i>
                                     <span class="title"><b>Active Records</b></span>
-                                    <p>
+                                    <p id="activeRecs">
                                         0 Files <br>
                                         0% of Total
                                     </p>
@@ -73,7 +71,7 @@
                                 <li class="collection-item avatar">
                                     <i class="mdi-file-folder circle red"></i>
                                     <span class="title"><b>Inactive Records</b></span>
-                                    <p>
+                                    <p id="inactiveRecs">
                                         0 Files <br>
                                         0% of Total
                                     </p>
@@ -82,7 +80,7 @@
                                 <li class="collection-item avatar">
                                     <i class="mdi-file-folder circle orange"></i>
                                     <span class="title"><b>Unspecified</b></span>
-                                    <p>
+                                    <p id="unspecRecs">
                                         0 Files <br>
                                         0% of Total
                                     </p>
@@ -91,7 +89,7 @@
                                 <li class="collection-item avatar">
                                     <i class="mdi-file-folder circle brown"></i>
                                     <span class="title"><b>Non-Records</b></span>
-                                    <p>
+                                    <p id="nonRecs">
                                         0 Files <br>
                                         0% of Total
                                     </p>
@@ -100,7 +98,7 @@
                                 <li class="collection-item avatar">
                                     <i class="mdi-file-folder circle"></i>
                                     <span class="title"><b>Other</b></span>
-                                    <p>
+                                    <p id="otherDocs">
                                         0 Files <br>
                                         0% of Total
                                     </p>

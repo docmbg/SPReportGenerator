@@ -10,7 +10,10 @@
         "console": false,
         "$": false,
         "ExcelPlus": false,
-        "alert": false
+        "alert": false,
+        "Materialize": false,
+        "progressJs": false,
+        "saveAs": false
     },
     "globalstrict": false,
     "quotmark": true,

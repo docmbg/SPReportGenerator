@@ -1,8 +1,18 @@
 /* jshint -W110 */
 
 var subsites = [],
-    fileCollection = [excelHeader],
-    excelHeader = ["Type", "Name", "Document Type", "FY", "Record Series Code", "Created By", "Modified By", "Created", "Last Modifed", "URL"],
+    excelHeader = [
+        "Type",
+        "Name",
+        "Document Type",
+        "FY",
+        "Record Series Code",
+        "Created By",
+        "Modified By",
+        "Created",
+        "Last Modifed",
+        "URL"
+    ],
     ep = new ExcelPlus(),
     today = new Date(),
     dd = today.getDate(),
@@ -13,20 +23,38 @@ var subsites = [],
     listCount = [],
     procdLists = [],
     rows = [],
-    rowNumber = 0;
+    rowNumber = 0,
+    activeRecs = [],
+    inactiveRecs = [],
+    unspecRecs = [],
+    nonRecs = [],
+    otherDocs = [],
+    VERSION = "ver. 0.1b";
+
+function getPercent(num, total) {
+    var result = Math.round((num / total) * 100);
+    return result;
+}
 
 function executeFileSave() {
     $.p.end();
+    getFiles();
+    $("#getFilesBtn").attr("class", "waves-effect waves-light btn");
+    $("#activeRecs").html(activeRecs.length + " Files <br>" + getPercent(activeRecs.length, rows.length) + "% of Total");
+    $("#inactiveRecs").html(inactiveRecs.length + " Files <br>" + getPercent(inactiveRecs.length, rows.length) + "% of Total");
+    $("#unspecRecs").html(unspecRecs.length + " Files <br>" + getPercent(unspecRecs.length, rows.length) + "% of Total");
+    $("#nonRecs").html(nonRecs.length + " Files <br>" + getPercent(nonRecs.length, rows.length) + "% of Total");
+    $("#otherDocs").html(otherDocs.length + " Files <br>" + getPercent(otherDocs.length, rows.length) + "% of Total");
     $("#progress").html(" " + rows.length + " FILES COLLECTED");
-    $("#downloadReportBtn").attr("class", "btn-floating btn-large");
+    $("#downloadReportBtn").attr("class", "btn-floating btn-large waves-light");
     $("#cancelProgress").hide();
-    $("#downloadReportBtn").click(function (event) {
+    $("#downloadReportBtn").one("click", function (event) {
         event.preventDefault();
         if (!!window.Worker) {
             var worker = new Worker("../js/saveFileWorker.js");
             worker.onmessage = function (e) {
                 if (e.data == "working") {
-                    Materialize.toast('Generating excel file. Be patient!', 4000) // 2000 is the duration of the toast
+                    Materialize.toast('Generating excel file. Be patient!', 4000);
                     $("#downloadReportBtn").unbind("click");
                     $("#downloadReportBtn").html("<i class='mdi-action-cached left'></i>");
                     $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
@@ -35,7 +63,7 @@ function executeFileSave() {
                     $("#downloadReportBtn").attr("class", "btn-floating btn-large green accent-3");
                     $("#downloadReportBtn").html("<i class='mdi-action-done left'></i>");
                 }
-            }
+            };
             worker.postMessage([ep]);
         }
     });
@@ -44,19 +72,14 @@ function executeFileSave() {
 function saveExcelFile(data, fileName) {
     //set the file name
     var filename = fileName + ".xlsx";
-    //check for browser compatability
-    //if (typeof Uint8Array === "undefined") {
-    //    this.error = "[saveAs] Sorry but this function is only supported by modern browsers";
-    //    this._showErrors();
-    //    return this;
-    //}
+
     //put the file stream together
     var s2ab = function (s) {
         var buf = new ArrayBuffer(s.length);
         var view = new Uint8Array(buf);
         for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
         return buf;
-    }
+    };
     //invoke the saveAs method from FileSaver.js
     saveAs(new Blob([s2ab(data)], { type: "application/octet-stream" }), filename);
 }
@@ -84,7 +107,6 @@ function getStaticName() {
                 dfd.resolve(fields[i].StaticName);
 
                 for (var choice in fields[i].Choices) {
-                    // console.log(fields[i].Choices[choice]);
                     var recTypeSelect = document.getElementById("recordTypes");
                     recTypeSelect.options[recTypeSelect.options.length] =
                         new Option(fields[i].Choices[choice], fields[i].Choices[choice]);
@@ -107,35 +129,50 @@ function genSitesArray() {
     return $.Deferred().resolve(false);
 }
 
-$(document).ready(function () {
-    $(".button-collapse").sideNav();
-    $("#cancelProgress").hide();
-    $("#checkAll").change(function () {
-        $("input:checkbox").prop('checked', $(this).prop("checked"));
-    });
 
-    $("#getFilesBtn").click(function (event) {
-        ep.createFile("Report");
-        ep.write({
-            "content": [excelHeader]
-        });
-        $("#downloadReportBtn").html("<i class='mdi-file-file-download left'></i>");
-        //$("#docsContainer").css('height', $("#sitesContainer").css('height'));
+function resetValues() {
+    $('#reportContainer>ul>li>p').html("0 Files <br>0% of Total");
+    ep.createFile("Report");
+    ep.write({
+        "content": [excelHeader]
+    });
+    activeRecs = [];
+    inactiveRecs = [];
+    unspecRecs = [];
+    nonRecs = [];
+    rows = [];
+    listCount = [];
+    procdLists = [];
+    otherDocs = [];
+    $("#downloadReportBtn").html("<i class='mdi-file-file-download left'></i>");
+}
+
+
+var getFiles = function () {
+    $("#getFilesBtn").one("click", function (event) {
+        resetValues();
         $.p = progressJs("#progressBar").start();
         event.preventDefault();
         genSitesArray().done(function () {
             if (subsites.length === 0) {
                 $.p.end();
-                Materialize.toast('Please select at least one stie/subsite!', 2000) // 2000 is the duration of the toast
+                Materialize.toast('Please select at least one stie/subsite!', 2000);
+                getFiles();
+            } else {
+                generateReport();
             }
-            $('#reportCollection >li >p').html("0 Files <br>0% of Total");
-            rows = [];
-            fileCollection = [excelHeader];
-            listCount = [];
-            procdLists = [];
-            generateReport();
         });
     });
+};
+
+$(document).ready(function () {
+    $("#version>a").html(VERSION);
+    $(".button-collapse").sideNav();
+    $("#cancelProgress").hide();
+    $("#checkAll").change(function () {
+        $("input:checkbox").prop('checked', $(this).prop("checked"));
+    });
+    getFiles();
 });
 
 function genCheckboxItem(title, url, elem) {
@@ -153,10 +190,8 @@ $().SPServices({
     operation: "GetAllSubWebCollection",
     async: true,
     completefunc: function (xData) {
-        // console.log(xData.responseText);
         $(xData.responseXML).find("Webs > Web").each(function () {
             var $node = $(this);
-            // console.log($node.attr("Title") + ", " + $node.attr("Url"));
             genCheckboxItem($node.attr("Title"), $node.attr("Url"), '#subsites');
         });
     }
@@ -175,11 +210,11 @@ function progress(count, all) {
 function getDocumentInfo() {
 
     //return the data for current list field that matches the document type
-    return function (data) {
+    return function (data, error) {
         //show errors in console if exist
-        //if (error !== undefined) {
-        //    console.log(error);
-        //}
+        if (error !== undefined) {
+            console.log(error);
+        }
         var regExEmail = new RegExp(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i);
         //console.log("Retrtieving documents for list...");
         //get info for fields returned
@@ -201,11 +236,6 @@ function getDocumentInfo() {
                         modified = $SP().cleanResult(data[j].getAttribute("Last_x0020_Modified")),
                         absURL = data[j].getAttribute("EncodedAbsUrl");
 
-
-            //console.log("Record Code: " + data[j].getAttribute("TRIM") + ";");
-            //console.log("Document Type: " + documentType + ";");
-            //console.log("Fiscal Year: " + fiscalYear + ";");
-            //console.log("Type: " + type);
             //return fields thad only match the "Document" content type, which has id of 0x0101
             if (ctypeID == "0x0101" &&
                 type !== "master" &&
@@ -223,6 +253,23 @@ function getDocumentInfo() {
 
                 rowNumber += 1;
                 rows.push(rowNumber);
+
+                switch (documentType) {
+                    case 'Active Record':
+                        activeRecs.push('a');
+                        break;
+                    case 'Inactive Record':
+                        inactiveRecs.push('i');
+                        break;
+                    case 'Non-Record':
+                        nonRecs.push('n');
+                        break;
+                    case 'Unspecified':
+                        unspecRecs.push('u');
+                        break;
+                    default:
+                        otherDocs.push('o');
+                }
 
                 if (type !== null) {
                     ep.write({
@@ -294,10 +341,6 @@ function getDocumentInfo() {
                     });
                 }
 
-                //log raw document file name and author in the console
-                //console.log(data[j].getAttribute("FileLeafRef"));
-
-
                 //create new list item element
                 //var li = "<li class='collection-item avatar'><i class='mdi-file-folder circle blue'></i>" +
                 //    "<span class='title'><b>" + fileName + "</b></span>" +
@@ -306,21 +349,24 @@ function getDocumentInfo() {
                 //    "<a href='" + absURL + "' class='secondary-content'><i class='mdi-file-file-download'></i></a>" +
                 //    "</li>";
 
-                //get the ordered list and append the list item
+                //get the ordered list and append the list item, doesn't currently exist in html
                 //$("#docs").append(li);
             }
-            //push li variable to the jStorage local storage
+            //TODO
+            //push li variable to the jStorage local storage when created
+            //it will allow the users to browse the files
         }
         procdLists.push('d');
         //progress(procdLists, listCount);
         $.p.set(progress(procdLists, listCount));
         if (progress(procdLists, listCount) < 100) {
+            $("#getFilesBtn").attr("class", "btn disabled");
             $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
             $("#downloadReportBtn").unbind("click");
             $("#cancelProgress").show();
-            $("#cancelProgress").click(function () {
+            $("#cancelProgress").click(function (e) {
                 executeFileSave();
-                prevent.default();
+                e.preventDefault();
             });
         } else {
             executeFileSave();
