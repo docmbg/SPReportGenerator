@@ -1130,7 +1130,7 @@ if (typeof jQuery === "function") {
                               // if we have a paging then we need to do the request again
                               if (setup.paging && --setup.page > 0) {
                                 // check if we need to go to another request
-                                var collection = data.getElementsByTagName("rs:data")[0];
+                                var collection = data.getElementsByTagName('rs:data')[0];
                                 if (collection.length==0) collection=data.getElementsByTagName("data"); // for Chrome
                                 if (setup.results.length===0) setup.results=aReturn;
                                 // notify that we keep loading
@@ -1154,7 +1154,8 @@ if (typeof jQuery === "function") {
                                 fct.call(_this,(setup.results.length>0?setup.results:aReturn));
                               }
                             }
-                     },
+                     }
+                     ,
                       error:function(jqXHR, textStatus, errorThrown) {
                         var res = jqXHR.responseXML;
                         var err = res.getElementsByTagName("errorstring");

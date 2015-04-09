@@ -1,14 +1,17 @@
-.nav-wrapper{
+.nav-wrapper {
     background: #0096D6;
 }
 
 .nav-wrapper >img {
     margin-left: 10px;
-    display:inline-block;
+    display: inline-block;
     vertical-align: middle;
 }
 
-.btn, .btn:hover, .btn-large, .btn-large:hover {
+.btn,
+.btn:hover,
+.btn-large,
+.btn-large:hover {
     background-color: #0096D6;
     height: 44px;
     line-height: 44px;
@@ -24,9 +27,9 @@ select {
     border: 1px solid #E0E0E0;
 }
 
-    select:focus {
-        outline: #0096D6;
-    }
+select:focus {
+    outline: #0096D6;
+}
 
 #circleProgress > svg {
     display: block;
@@ -70,4 +73,29 @@ label {
 
 .collection {
     margin-top: 0;
+}
+
+.rotate {
+    -webkit-animation: spin 4s linear infinite;
+    -moz-animation: spin 4s linear infinite;
+    animation: spin 4s linear infinite;
+}
+
+@-moz-keyframes spin {
+    100% {
+        -moz-transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }
