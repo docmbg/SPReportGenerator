@@ -182,7 +182,8 @@ var getFiles = function() {
 
 $(document).ready(function() {
     $('.modal-trigger').leanModal();
-    $("#instrContent").load("https://cdn.rawgit.com/docmbg/SPReportGenerator/production/helpers/instructions.html");
+    $("#instrContent").load("https://cdn.rawgit.com/docmbg/SPReportGenerator/beta/helpers/instructions.html");
+    $("#changelogModal").load("https://cdn.rawgit.com/docmbg/SPReportGenerator/beta/helpers/instructions.html");
     $("#version").find(">a").html(VERSION);
     $(".button-collapse").sideNav();
     $("#cancelProgress").hide();
