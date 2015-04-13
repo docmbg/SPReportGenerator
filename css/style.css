@@ -141,12 +141,9 @@ label {
     #recordTypes {
         margin-bottom: 10px;
     }
-/*    a.brand-logo{
-        font-size: 1.2em;
 
-    }*/
     #collectionHeader>h5{
-        font-size: 1.5em;
+        font-size: 1.2em;
     }
     #downloadReportBtn {
         margin-right: -25px;
@@ -156,10 +153,6 @@ label {
 
 @media screen and (max-width: 992px){
     #collectionHeader>h5{
-        font-size: 1em;
-    }
-    a.brand-logo{
         font-size: 1.2em;
-
     }
 }
