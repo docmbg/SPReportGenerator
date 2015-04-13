@@ -46,6 +46,7 @@
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a class="modal-trigger tooltipped" data-position="bottom" data-delay="50" data-tooltip="Instruction" href="#istrModal"><i class="mdi-social-school"></i></a></li>
                 <li><a class="modal-trigger tooltipped" data-position="bottom" data-delay="50" data-tooltip="What's New" href="#changelogModal"><i class="mdi-av-new-releases"></i></a></li>
+                <li><a class="modal-trigger tooltipped" data-position="bottom" data-delay="50" data-tooltip="Preferences" href="#preferences"><i class="mdi-action-settings"></i></a></li>
                 <li id="version" class="disabled">
                     <a href="#"></a>
                 </li>
@@ -185,6 +186,24 @@
         </div>
         <div class="modal-footer">
             <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">ok</a>
+        </div>
+    </div>
+    <div id="preferences" class="modal">
+        <div class="modal-content">
+            <h5>Preferences</h5>
+            <br>
+            <br>
+            <form action="#">
+                <p><b>Experimental: </b>Override report item limit</p>
+                <p class="range-field">
+                    <input type="range" id="itemLimit" min="25000" max="30000" value="25000" />
+                </p>
+            </form>
+        </div>
+        <br>
+        <br>
+        <div class="modal-footer">
+            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Apply</a>
         </div>
     </div>
 </body>

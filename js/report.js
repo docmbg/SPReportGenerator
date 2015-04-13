@@ -54,8 +54,8 @@ function executeFileSave() {
     $("#cancelProgress").hide();
     $("#downloadReportBtn").one("click", function(event) {
         event.preventDefault();
-        //TODO check for number of items and limit it to 25000
-        if (rows.length > 25000) {
+        
+        if (rows.length > $("#itemLimit").val()) {
             $('#warnItemLimit').openModal({
             	complete: function() {
             		$("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
@@ -181,6 +181,7 @@ var getFiles = function() {
 };
 
 $(document).ready(function() {
+	console.log($("#itemLimit").val());
     $('.modal-trigger').leanModal();
     $("#instrContent").load("https://rawgit.com/docmbg/SPReportGenerator/beta/helpers/instructions.html");
     $("#changelogContent").load("https://rawgit.com/docmbg/SPReportGenerator/beta/helpers/changelog.html");
