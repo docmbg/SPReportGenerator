@@ -160,3 +160,7 @@ label {
 .modal {
     background-color: #fff;
 }
+
+input[type=range]+.thumb {
+    background-color: #0096d6;
+}
