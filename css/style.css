@@ -156,3 +156,7 @@ label {
         font-size: 1.2em;
     }
 }
+
+.modal {
+    background-color: #fff;
+}

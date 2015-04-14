@@ -49,12 +49,12 @@ function executeFileSave() {
     $("#unspecRecs").html(unspecRecs.length + " Files <br>" + getPercent(unspecRecs.length, rows.length) + "% of Total");
     $("#nonRecs").html(nonRecs.length + " Files <br>" + getPercent(nonRecs.length, rows.length) + "% of Total");
     $("#otherDocs").html(otherDocs.length + " Files <br>" + getPercent(otherDocs.length, rows.length) + "% of Total");
+    if(rows.length > $("#itemLimit").val()) $("#progress").css("color", "red");
     $("#progress").html(" " + rows.length + " FILES COLLECTED");
     $("#downloadReportBtn").attr("class", "btn-floating btn-large waves-effect waves-light modal-trigger");
     $("#cancelProgress").hide();
     $("#downloadReportBtn").one("click", function(event) {
         event.preventDefault();
-        
         if (rows.length > $("#itemLimit").val()) {
             $('#warnItemLimit').openModal({
             	complete: function() {
@@ -171,7 +171,7 @@ var getFiles = function() {
         event.preventDefault();
         genSitesArray().done(function() {
             if (subsites.length === 0) {
-                Materialize.toast('Please select at least one stie/subsite!', 2000);
+                Materialize.toast('Please select at least one site/sub-site!', 2000);
                 getFiles();
             } else {
                 generateReport();
