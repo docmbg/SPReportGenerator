@@ -29,7 +29,7 @@ var subsites = [],
     unspecRecs = [],
     nonRecs = [],
     otherDocs = [],
-    VERSION = "ver. 0.1b";
+    VERSION = "ver. 0.2b";
 
 function getPercent(num, total) {
     var result = 0;
