@@ -8,7 +8,7 @@ onmessage = function (epObject) {
 
     console.log("Began xslx document creation!");
 
-    var wbout = XLSX.write(ep.oFile, { bookType: 'xlsx', bookSST: true, type: 'binary' });
+    var wbout = XLSX.write(ep.oFile, { bookType: 'xlsx', bookSST: false, type: 'binary' });
 
     postMessage(wbout);
 
