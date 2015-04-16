@@ -125,6 +125,7 @@ function getStaticName() {
                     var recTypeSelect = document.getElementById("recordTypes");
                     recTypeSelect.options[recTypeSelect.options.length] =
                         new Option(fields[i].Choices[choice], fields[i].Choices[choice]);
+                    $('select').material_select();
                 }
             }
         }
@@ -146,6 +147,7 @@ function genSitesArray() {
 
 
 function resetValues() {
+    $("#progress").css("color", "#0096D6");
     $('#reportContainer').find('>ul>li>p').html("0 Files <br>0% of Total");
     ep.createFile("Report");
     ep.write({
@@ -181,6 +183,7 @@ var getFiles = function() {
 };
 
 $(document).ready(function() {
+    $('select').material_select();
     $('.modal-trigger').leanModal();
     $("#instrContent").load("https://rawgit.com/docmbg/SPReportGenerator/beta/helpers/instructions.html");
     $("#changelogContent").load("https://rawgit.com/docmbg/SPReportGenerator/beta/helpers/changelog.html");

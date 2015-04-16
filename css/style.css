@@ -38,13 +38,33 @@ html {
     height: 55.5px;
 }
 
-select {
+/*If you use browser default select enable below styling*/
+
+/*select {
     background: transparent;
     border: 1px solid #E0E0E0;
 }
 
 select:focus {
     outline: #0096D6;
+}*/
+
+/*Materialize css styling override*/
+
+.select-wrapper input.select-dropdown {
+    border-bottom: 1px solid #E0E0E0;
+    &:focus {
+        outline: none;
+    }
+}
+
+.dropdown-content li {
+    line-height: 1rem;
+}
+
+.dropdown-content li>a, .dropdown-content li>span {
+    font-size: 1rem;
+    color: #0096D6;
 }
 
 #circleProgress > svg {
