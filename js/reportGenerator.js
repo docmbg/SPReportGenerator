@@ -63,7 +63,7 @@ function executeFileSave() {
             });
         } else {
             if (!!window.Worker) {
-                var worker = new Worker("https://cdn.rawgit.com/docmbg/SPReportGenerator/production/js/saveFileWorker.js");
+                var worker = new Worker("https://cdn.rawgit.com/docmbg/SPReportGenerator/1.0/js/saveFileWorker.js");
                 worker.onmessage = function(e) {
                     if (e.data == "working") {
                         Materialize.toast('Generating excel file. Be patient!', 4000);
@@ -185,8 +185,8 @@ var getFiles = function() {
 $(document).ready(function() {
     $('select').material_select();
     $('.modal-trigger').leanModal();
-    $("#instrContent").load("https://rawgit.com/docmbg/SPReportGenerator/beta/helpers/instructions.html");
-    $("#changelogContent").load("https://rawgit.com/docmbg/SPReportGenerator/beta/helpers/changelog.html");
+    $("#instrContent").load("https://rawgit.com/docmbg/SPReportGenerator/1.0/helpers/instructions.html");
+    $("#changelogContent").load("https://rawgit.com/docmbg/SPReportGenerator/1.0/helpers/changelog.html");
     $("#version").find(">a").html(VERSION);
     $(".button-collapse").sideNav();
     $("#cancelProgress").hide();
