@@ -235,6 +235,14 @@ function catchError() {
     };
 }
 
+function bytesToSize(bytes) {
+   if(bytes === 0) return '0 Byte';
+   var k = 1000;
+   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+   var i = Math.floor(Math.log(bytes) / Math.log(k));
+   return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+}
+
 function getDocumentInfo() {
     //return the data for current list field that matches the document type
     return function(data, error) {
@@ -269,7 +277,7 @@ function getDocumentInfo() {
 
                 type = data[j].getAttribute("DocIcon");
                 fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef"));
-                fileSize = data[j].getAttribute("File_x0020_Size");
+                fileSize = $SP().cleanResult(data[j].getAttribute("File_x0020_Size"));
                 documentType = $SP().cleanResult(data[j].getAttribute(sName)).toString();
                 fiscalYear = data[j].getAttribute("FY");
                 recordCode = data[j].getAttribute("TRIM");
@@ -333,7 +341,7 @@ function getDocumentInfo() {
                     if (fileSize !== null) {
                         ep.write({
                             "cell": "C" + (rows.length + 1),
-                            "content": fileSize
+                            "content": bytesToSize(fileSize)
                         });
                     }
 
