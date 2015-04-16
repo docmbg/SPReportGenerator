@@ -63,7 +63,7 @@ function executeFileSave() {
             });
         } else {
             if (!!window.Worker) {
-                var worker = new Worker("../js/saveFileWorker.js");
+                var worker = new Worker("https://cdn.rawgit.com/docmbg/SPReportGenerator/production/js/saveFileWorker.js");
                 worker.onmessage = function(e) {
                     if (e.data == "working") {
                         Materialize.toast('Generating excel file. Be patient!', 4000);
