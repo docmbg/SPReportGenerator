@@ -2,8 +2,8 @@
 
 onmessage = function (epObject) {
 
-    var ep = epObject.data[0];
-    var msg = "working";
+    var ep = epObject.data[0],
+        msg = "working";
     postMessage(msg);
 
     console.log("Began xslx document creation!");
