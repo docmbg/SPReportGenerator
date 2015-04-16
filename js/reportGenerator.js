@@ -333,7 +333,7 @@ function getDocumentInfo() {
                     if (fileSize !== null) {
                         ep.write({
                             "cell": "C" + (rows.length + 1),
-                            "content": fileName
+                            "content": fileSize
                         });
                     }
 
