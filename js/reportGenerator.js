@@ -4,6 +4,7 @@ var subsites = [],
     excelHeader = [
         "Type",
         "Name",
+        "Size",
         "Document Type",
         "FY",
         "Record Series Code",
@@ -255,6 +256,7 @@ function getDocumentInfo() {
             if (cTypeID === "0x0101") {
                 var type,
                     fileName,
+                    fileSize,
                     documentType,
                     fiscalYear,
                     recordCode,
@@ -267,6 +269,7 @@ function getDocumentInfo() {
 
                 type = data[j].getAttribute("DocIcon");
                 fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef"));
+                fileSize = data[j].getAttribute("File_x0020_Size");
                 documentType = $SP().cleanResult(data[j].getAttribute(sName)).toString();
                 fiscalYear = data[j].getAttribute("FY");
                 recordCode = data[j].getAttribute("TRIM");
@@ -327,58 +330,65 @@ function getDocumentInfo() {
                         });
                     }
 
-                    if (documentType.length >= 1) {
+                    if (fileSize !== null) {
                         ep.write({
                             "cell": "C" + (rows.length + 1),
+                            "content": fileName
+                        });
+                    }
+
+                    if (documentType.length >= 1) {
+                        ep.write({
+                            "cell": "D" + (rows.length + 1),
                             "content": documentType
                         });
                     }
 
                     if (fiscalYear !== null) {
                         ep.write({
-                            "cell": "D" + (rows.length + 1),
+                            "cell": "E" + (rows.length + 1),
                             "content": fiscalYear
                         });
                     }
 
                     if (recordCode !== null) {
                         ep.write({
-                            "cell": "E" + (rows.length + 1),
+                            "cell": "F" + (rows.length + 1),
                             "content": recordCode
                         });
                     }
 
                     if (createdBy.length >= 1) {
                         ep.write({
-                            "cell": "F" + (rows.length + 1),
+                            "cell": "G" + (rows.length + 1),
                             "content": createdBy + ""
                         });
                     }
 
                     if (modifiedBy.length >= 1) {
                         ep.write({
-                            "cell": "G" + (rows.length + 1),
+                            "cell": "H" + (rows.length + 1),
                             "content": modifiedBy + ""
                         });
                     }
 
                     if (created !== null) {
                         ep.write({
-                            "cell": "H" + (rows.length + 1),
+                            "cell": "I" + (rows.length + 1),
                             "content": created + ""
                         });
                     }
 
                     if (modified !== null) {
                         ep.write({
-                            "cell": "I" + (rows.length + 1),
+                            "cell": "J" + (rows.length + 1),
                             "content": modified + ""
                         });
                     }
 
                     if (absURL !== null) {
                         ep.write({
-                            "cell": "J" + (rows.length + 1),
+                            "cell": "K" + (rows.length + 1),
                             "content": absURL + ""
                         });
                     }
@@ -428,13 +438,13 @@ function getDocuments(url, recType, staticName) {
             listCount.push(list[i].Name);
             if (recType !== "All Types") {
                 $SP().list(list[i].Name, url).get({
-                    fields: "ContentType,ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
+                    fields: "ContentType,ContentTypeId,File_x0020_Size,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     where: staticName + '="' + recType + '"' + ' AND ContentType = "Document"',
                     expandUserField: true
                 }, getDocumentInfo());
             } else {
                 $SP().list(list[i].Name, url).get({
-                    fields: "ContentType,ContentTypeId,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
+                    fields: "ContentType,ContentTypeId,File_x0020_Size,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     where: 'ContentType = "' + 'Document"',
                     expandUserField: true
                         //staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
