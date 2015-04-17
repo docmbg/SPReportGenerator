@@ -72,7 +72,7 @@ function executeFileSave() {
                         $("#downloadReportBtn").attr("class", "btn-floating btn-large orange");
                         $("#downloadReportBtn").unbind("click");
                     } else {
-                        saveExcelFile(e.data, $('#recordTypes option:selected').text() + "_" + today);
+                        saveExcelFile(e.data[0], $('#recordTypes option:selected').text() + "_" + today);
                         $("#downloadReportBtn").attr("class", "btn-floating btn-large green accent-3");
                         $("#downloadReportBtn").html("<i class='mdi-action-done left'></i>");
                     }
