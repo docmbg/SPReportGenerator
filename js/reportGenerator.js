@@ -5,6 +5,7 @@ var subsites = [],
         "Type",
         "Name",
         "Size",
+        "Size in bytes",
         "Document Type",
         "FY",
         "Record Series Code",
@@ -52,9 +53,8 @@ function executeFileSave() {
     $("#otherDocs").html(otherDocs.length + " Files <br>" + getPercent(otherDocs.length, rows.length) + "% of Total");
     if(rows.length > $("#itemLimit").val()) $("#progress").css("color", "red");
     $("#progress").html(" " + rows.length + " FILES COLLECTED");
-    $("#downloadReportBtn").attr("class", "btn-floating btn-large waves-effect waves-light modal-trigger");
     $("#cancelProgress").hide();
-    $("#downloadReportBtn").one("click", function(event) {
+    $("#downloadReportBtn").attr("class", "btn-floating btn-large waves-effect waves-light modal-trigger").one("click", function(event) {
         event.preventDefault();
         if (rows.length > $("#itemLimit").val()) {
             $('#warnItemLimit').openModal({
@@ -68,13 +68,10 @@ function executeFileSave() {
                 worker.onmessage = function(e) {
                     if (e.data == "working") {
                         Materialize.toast('Generating excel file. Be patient!', 4000);
-                        $("#downloadReportBtn").html("<i class='mdi-action-cached left rotate'></i>");
-                        $("#downloadReportBtn").attr("class", "btn-floating btn-large orange");
-                        $("#downloadReportBtn").unbind("click");
+                        $("#downloadReportBtn").html("<i class='mdi-action-cached left rotate'></i>").attr("class", "btn-floating btn-large orange").unbind("click");
                     } else {
-                        saveExcelFile(e.data[0], $('#recordTypes option:selected').text() + "_" + today);
-                        $("#downloadReportBtn").attr("class", "btn-floating btn-large green accent-3");
-                        $("#downloadReportBtn").html("<i class='mdi-action-done left'></i>");
+                        saveExcelFile(e.data[0], $('#recordTypes').find('option:selected').text() + "_" + today);
+                        $("#downloadReportBtn").attr("class", "btn-floating btn-large green accent-3").html("<i class='mdi-action-done left'></i>");
                     }
                 };
                 worker.postMessage([ep]);
@@ -345,58 +342,65 @@ function getDocumentInfo() {
                         });
                     }
 
-                    if (documentType.length >= 1) {
+                    if (fileSize !== null) {
                         ep.write({
                             "cell": "D" + (rows.length + 1),
+                            "content": fileSize
+                        });
+                    }
+
+                    if (documentType.length >= 1) {
+                        ep.write({
+                            "cell": "E" + (rows.length + 1),
                             "content": documentType
                         });
                     }
 
                     if (fiscalYear !== null) {
                         ep.write({
-                            "cell": "E" + (rows.length + 1),
+                            "cell": "F" + (rows.length + 1),
                             "content": fiscalYear
                         });
                     }
 
                     if (recordCode !== null) {
                         ep.write({
-                            "cell": "F" + (rows.length + 1),
+                            "cell": "G" + (rows.length + 1),
                             "content": recordCode
                         });
                     }
 
                     if (createdBy.length >= 1) {
                         ep.write({
-                            "cell": "G" + (rows.length + 1),
+                            "cell": "H" + (rows.length + 1),
                             "content": createdBy + ""
                         });
                     }
 
                     if (modifiedBy.length >= 1) {
                         ep.write({
-                            "cell": "H" + (rows.length + 1),
+                            "cell": "I" + (rows.length + 1),
                             "content": modifiedBy + ""
                         });
                     }
 
                     if (created !== null) {
                         ep.write({
-                            "cell": "I" + (rows.length + 1),
+                            "cell": "J" + (rows.length + 1),
                             "content": created + ""
                         });
                     }
 
                     if (modified !== null) {
                         ep.write({
-                            "cell": "J" + (rows.length + 1),
+                            "cell": "K" + (rows.length + 1),
                             "content": modified + ""
                         });
                     }
 
                     if (absURL !== null) {
                         ep.write({
-                            "cell": "K" + (rows.length + 1),
+                            "cell": "L" + (rows.length + 1),
                             "content": absURL + ""
                         });
                     }
@@ -423,10 +427,8 @@ function getDocumentInfo() {
         $.p.set(progress(procdLists, listCount));
         if (progress(procdLists, listCount) < 100) {
             $("#getFilesBtn").attr("class", "btn disabled");
-            $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
-            $("#downloadReportBtn").unbind("click");
-            $("#cancelProgress").show();
-            $("#cancelProgress").click(function(e) {
+            $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled").unbind("click");
+            $("#cancelProgress").show().click(function(e) {
                 e.preventDefault();
             });
         } else {
@@ -463,8 +465,9 @@ function getDocuments(url, recType, staticName) {
 }
 
 function generateReport() {
+    var recType;
     console.log("Getting documents...");
-    var recType = $('#recordTypes').find('option:selected').val();
+    recType = $('#recordTypes').find('option:selected').val();
 
     for (var i = 0; i < subsites.length; i++) {
         getDocuments(subsites[i], recType, sName);
