@@ -183,8 +183,8 @@ var getFiles = function() {
 $(document).ready(function() {
     $('select').material_select();
     $('.modal-trigger').leanModal();
-    $("#instrContent").load("https://rawgit.com/docmbg/SPReportGenerator/1.0/helpers/instructions.html");
-    $("#changelogContent").load("https://rawgit.com/docmbg/SPReportGenerator/1.0/helpers/changelog.html");
+    $("#instrContent").load("../helpers/instructions.html");
+    $("#changelogContent").load("../helpers/changelog.html");
     $("#version").find(">a").html(VERSION);
     $(".button-collapse").sideNav();
     $("#cancelProgress").hide();
