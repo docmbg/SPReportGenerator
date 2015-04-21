@@ -9,11 +9,14 @@ var subsites = [],
         "Document Type",
         "FY",
         "Record Series Code",
+        "Library",
+        "Library Location",
         "Created By",
         "Modified By",
         "Created",
         "Last Modified",
         "URL"
+
     ],
     ep = new ExcelPlus(),
     today = new Date(),
@@ -31,7 +34,7 @@ var subsites = [],
     unspecRecs = [],
     nonRecs = [],
     otherDocs = [],
-    VERSION = "v1.0";
+    VERSION = "v1.1";
 
 function getPercent(num, total) {
     var result = 0;
@@ -51,20 +54,20 @@ function executeFileSave() {
     $("#unspecRecs").html(unspecRecs.length + " Files <br>" + getPercent(unspecRecs.length, rows.length) + "% of Total");
     $("#nonRecs").html(nonRecs.length + " Files <br>" + getPercent(nonRecs.length, rows.length) + "% of Total");
     $("#otherDocs").html(otherDocs.length + " Files <br>" + getPercent(otherDocs.length, rows.length) + "% of Total");
-    if(rows.length > $("#itemLimit").val()) $("#progress").css("color", "red");
+    if (rows.length > $("#itemLimit").val()) $("#progress").css("color", "red");
     $("#progress").html(" " + rows.length + " FILES COLLECTED");
     $("#cancelProgress").hide();
     $("#downloadReportBtn").attr("class", "btn-floating btn-large waves-effect waves-light modal-trigger").one("click", function(event) {
         event.preventDefault();
         if (rows.length > $("#itemLimit").val()) {
             $('#warnItemLimit').openModal({
-            	complete: function() {
-            		$("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
-            	} // Callback for Modal close
+                complete: function() {
+                        $("#downloadReportBtn").attr("class", "btn-floating btn-large disabled");
+                    } // Callback for Modal close
             });
         } else {
             if (!!window.Worker) {
-                var worker = new Worker("js/saveFileWorker.js");
+                var worker = new Worker("../js/saveFileWorker.js");
                 worker.onmessage = function(e) {
                     if (e.data == "working") {
                         Materialize.toast('Generating excel file. Be patient!', 4000);
@@ -233,14 +236,14 @@ function catchError() {
 }
 
 function bytesToSize(bytes) {
-   if(bytes === 0) return '0 Byte';
-   var k = 1000;
-   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-   var i = Math.floor(Math.log(bytes) / Math.log(k));
-   return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+    if (bytes === 0) return '0 Byte';
+    var k = 1000;
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
 }
 
-function getDocumentInfo() {
+function getDocumentInfo(listName, siteURL) {
     //return the data for current list field that matches the document type
     return function(data, error) {
         //show errors in console if exist
@@ -370,37 +373,47 @@ function getDocumentInfo() {
                         });
                     }
 
+                    ep.write({
+                        "cell": "H" + (rows.length + 1),
+                        "content": listName + ""
+                    });
+
+                    ep.write({
+                        "cell": "I" + (rows.length + 1),
+                        "content": siteURL.split("teams/")[1].replace(/\//g, " > ") + ""
+                    });
+
                     if (createdBy.length >= 1) {
                         ep.write({
-                            "cell": "H" + (rows.length + 1),
+                            "cell": "J" + (rows.length + 1),
                             "content": createdBy + ""
                         });
                     }
 
                     if (modifiedBy.length >= 1) {
                         ep.write({
-                            "cell": "I" + (rows.length + 1),
+                            "cell": "K" + (rows.length + 1),
                             "content": modifiedBy + ""
                         });
                     }
 
                     if (created !== null) {
                         ep.write({
-                            "cell": "J" + (rows.length + 1),
+                            "cell": "L" + (rows.length + 1),
                             "content": created + ""
                         });
                     }
 
                     if (modified !== null) {
                         ep.write({
-                            "cell": "K" + (rows.length + 1),
+                            "cell": "M" + (rows.length + 1),
                             "content": modified + ""
                         });
                     }
 
                     if (absURL !== null) {
                         ep.write({
-                            "cell": "L" + (rows.length + 1),
+                            "cell": "N" + (rows.length + 1),
                             "content": absURL + ""
                         });
                     }
@@ -451,14 +464,14 @@ function getDocuments(url, recType, staticName) {
                     fields: "ContentType,ContentTypeId,File_x0020_Size,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     where: staticName + '="' + recType + '"' + ' AND ContentType = "Document"',
                     expandUserField: true
-                }, getDocumentInfo());
+                }, getDocumentInfo(list[i].Name, url));
             } else {
                 $SP().list(list[i].Name, url).get({
                     fields: "ContentType,ContentTypeId,File_x0020_Size,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
                     where: 'ContentType = "' + 'Document"',
                     expandUserField: true
                         //staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
-                }, getDocumentInfo());
+                }, getDocumentInfo(list[i].Name, url));
             }
         }
     });
