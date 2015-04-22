@@ -228,6 +228,7 @@ function progress(count, all) {
     return result;
 }
 
+//catches window error
 function catchError() {
     window.onerror = function(errorMsg) {
         //alert('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber);
