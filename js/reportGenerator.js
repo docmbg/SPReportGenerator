@@ -67,7 +67,7 @@ function executeFileSave() {
             });
         } else {
             if (!!window.Worker) {
-                var worker = new Worker("../js/saveFileWorker.js");
+                var worker = new Worker("js/saveFileWorker.js");
                 worker.onmessage = function(e) {
                     if (e.data == "working") {
                         Materialize.toast('Generating excel file. Be patient!', 4000);
@@ -107,36 +107,36 @@ function getCurrentSite() {
 }
 
 // will use in RIST Page
-function getStaticName() {
-    var currentSite;
+// function getStaticName() {
+//     var currentSite;
 
-    getCurrentSite().done(function(dfdResolve) {
-        currentSite = dfdResolve;
-    });
+//     getCurrentSite().done(function(dfdResolve) {
+//         currentSite = dfdResolve;
+//     });
 
-    var dfd = $.Deferred();
+//     var dfd = $.Deferred();
 
-    $SP().list("Inactive Records", currentSite).info(function(fields) {
-        for (var i = 0; i < fields.length; i++) {
-            if (fields[i].DisplayName === "Document Type") {
+//     $SP().list("Inactive Records", currentSite).info(function(fields) {
+//         for (var i = 0; i < fields.length; i++) {
+//             if (fields[i].DisplayName === "Document Type") {
 
-                dfd.resolve(fields[i].StaticName);
+//                 dfd.resolve(fields[i].StaticName);
 
-                for (var choice in fields[i].Choices) {
-                    var recTypeSelect = document.getElementById("recordTypes");
-                    recTypeSelect.options[recTypeSelect.options.length] =
-                        new Option(fields[i].Choices[choice], fields[i].Choices[choice]);
-                    $('select').material_select();
-                }
-            }
-        }
-    });
-    return dfd.promise();
-}
+//                 for (var choice in fields[i].Choices) {
+//                     var recTypeSelect = document.getElementById("recordTypes");
+//                     recTypeSelect.options[recTypeSelect.options.length] =
+//                         new Option(fields[i].Choices[choice], fields[i].Choices[choice]);
+//                     $('select').material_select();
+//                 }
+//             }
+//         }
+//     });
+//     return dfd.promise();
+// }
 
-getStaticName().done(function(a) {
-    sName = a;
-});
+// getStaticName().done(function(a) {
+//     sName = a;
+// });
 
 function genSitesArray() {
     console.log("Generating array of sub-sites");
@@ -186,8 +186,8 @@ var getFiles = function() {
 $(document).ready(function() {
     $('select').material_select();
     $('.modal-trigger').leanModal();
-    $("#instrContent").load("../helpers/instructions.html");
-    $("#changelogContent").load("../helpers/changelog.html");
+    $("#instrContent").load("https://rawgit.com/docmbg/SPReportGenerator/1.0/helpers/instructions.html");
+    $("#changelogContent").load("https://rawgit.com/docmbg/SPReportGenerator/1.0/helpers/changelog.html");
     $("#version").find(">a").html(VERSION);
     $(".button-collapse").sideNav();
     $("#cancelProgress").hide();
@@ -279,7 +279,7 @@ function getDocumentInfo(listName, siteURL) {
                 type = data[j].getAttribute("DocIcon");
                 fileName = $SP().cleanResult(data[j].getAttribute("FileLeafRef"));
                 fileSize = $SP().cleanResult(data[j].getAttribute("File_x0020_Size"));
-                documentType = $SP().cleanResult(data[j].getAttribute(sName)).toString();
+                //documentType = $SP().cleanResult(data[j].getAttribute(sName)).toString();
                 fiscalYear = data[j].getAttribute("FY");
                 recordCode = data[j].getAttribute("TRIM");
                 createdBy = $SP().cleanResult(data[j].getAttribute("Author")
@@ -353,12 +353,12 @@ function getDocumentInfo(listName, siteURL) {
                         });
                     }
 
-                    if (documentType.length >= 1) {
-                        ep.write({
-                            "cell": "E" + (rows.length + 1),
-                            "content": documentType
-                        });
-                    }
+                    // if (documentType.length >= 1) {
+                    //     ep.write({
+                    //         "cell": "E" + (rows.length + 1),
+                    //         "content": documentType
+                    //     });
+                    // }
 
                     if (fiscalYear !== null) {
                         ep.write({
@@ -468,7 +468,7 @@ function getDocuments(url, recType, staticName) {
                 }, getDocumentInfo(list[i].Name, url));
             } else {
                 $SP().list(list[i].Name, url).get({
-                    fields: "ContentType,ContentTypeId,File_x0020_Size,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified," + staticName,
+                    fields: "ContentType,ContentTypeId,File_x0020_Size,DocIcon,FileLeafRef,FY,TRIM,EncodedAbsUrl,Editor,Author,Created_x0020_Date,Last_x0020_Modified,",
                     where: 'ContentType = "' + 'Document"',
                     expandUserField: true
                         //staticName + '="Active Record" OR ' + staticName + '="Inactive Record" OR ' + staticName + '="Unspecified" OR ' + staticName + '="Non-Record" OR ' + staticName + '=" "'
