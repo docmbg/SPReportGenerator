@@ -294,11 +294,8 @@ function getDocumentInfo(listName, siteURL) {
                 if (
                     type !== "master" &&
                     type !== "aspx" &&
-                    type !== "png" &&
-                    type !== "gif" &&
                     type !== "xsl" &&
                     type !== "xoml" &&
-                    type !== "jpg" &&
                     type !== "xsn" &&
                     type !== "css" &&
                     type !== "xaml" &&
