@@ -15,7 +15,7 @@ html {
 }
 
 .nav-wrapper {
-    background: #000000;
+    background: black;
 }
 
 .nav-wrapper >img {
@@ -64,7 +64,7 @@ select:focus {
 
 .dropdown-content li>a, .dropdown-content li>span {
     font-size: 1rem;
-    color: #0096D6;
+    color: #000000;
 }
 
 #circleProgress > svg {
@@ -141,7 +141,7 @@ label {
 }
 
 input[type=range]+.thumb {
-    background-color: #0096d6;
+    background-color: #000000;
 }
 
 @media screen and (max-width: 601px) {
