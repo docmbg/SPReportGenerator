@@ -1,4 +1,4 @@
-﻿importScripts("https://rawgit.com/docmbg/SPReportGenerator/1.0/libraries/xlsx.core.min.js");
+﻿importScripts("https://cdn.jsdelivr.net/gh/docmbg/SPReportGenerator@1.0/libraries/xlsx.core.min.js");
 
 onmessage = function (epObject) {
 
